@@ -108,4 +108,4 @@ if not st.session_state.game_started:
     st.session_state.selected_numbers = selected
 
     if selected:
-        st.success(f"Επιλέξατε την προπαίδεια του: **{', '.join(map(str, selected))}
+        st.success(f"Επιλέξατε την προπαίδεια του: **{', '.join(map(str, selected))"}
