@@ -5,18 +5,16 @@ import time
 # 1. Ρύθμιση σελίδας
 st.set_page_config(page_title="Μαθαίνω την Προπαίδεια", page_icon="🧮")
 
-# 2. CSS για Σταθερότητα και Καθαρό UI
+# 2. CSS για Σταθερότητα και Animations
 css_code = """
 <style>
 .stApp { background-color: #f0f7ff; }
 
-/* Animation Εισόδου (Μόνο για την αρχή) */
 @keyframes zoomIn { 
     0% { transform: scale(0.5); opacity: 0; } 
     100% { transform: scale(1); opacity: 1; } 
 }
 
-/* Animation Εξόδου (Μόνο για το τέλος) */
 @keyframes slideOut { 
     0% { transform: translateX(0); opacity: 1; } 
     100% { transform: translateX(150%); opacity: 0; } 
@@ -24,14 +22,17 @@ css_code = """
 
 .flip-card { background-color: transparent; width: 100%; height: 250px; perspective: 1000px; margin: 20px 0; }
 
-/* Κλάσεις για τα εφέ */
-.first-card { animation: zoomIn 0.6s ease-out forwards; }
-.last-card { animation: slideOut 0.7s ease-in forwards; }
+/* Animation μόνο για την πρώτη κάρτα */
+.first-card-anim { animation: zoomIn 0.6s ease-out forwards; }
+
+/* Animation μόνο για τον τερματισμό */
+.last-card-anim { animation: slideOut 0.7s ease-in forwards; }
 
 .flip-card-inner { 
     position: relative; width: 100%; height: 100%; text-align: center; 
     transition: transform 0.6s; transform-style: preserve-3d; 
 }
+
 .do-flip { transform: rotateY(180deg); }
 
 .flip-card-front, .flip-card-back { 
@@ -69,21 +70,4 @@ st.title("🧮 Το παιχνίδι της Προπαίδειας")
 if not st.session_state.game_started:
     st.subheader("Ποιους αριθμούς θα μάθουμε σήμερα;")
     cols = st.columns(5)
-    selected = [i for i in range(1, 11) if cols[(i-1)%5].checkbox(str(i), key=f"s_{i}")]
-    st.session_state.selected_numbers = selected
-    if selected:
-        if st.button("🚀 ΞΕΚΙΝΑΜΕ!", type="primary"):
-            st.session_state.game_started = True
-            st.session_state.correct_answers = set()
-            st.session_state.current_q = None
-            st.session_state.is_finished = False
-            st.rerun()
-    else: st.info("💡 Επίλεξε αριθμούς!")
-
-# --- ΟΘΟΝΗ ΠΑΙΧΝΙΔΙΟΥ ---
-else:
-    all_q = [(n, i) for n in st.session_state.selected_numbers for i in range(1, 11)]
-    rem_q = [q for q in all_q if q not in st.session_state.correct_answers]
-
-    # Αν τελείωσε το παιχνίδι
-    if not rem_q and not st.session_
+    selected = [i for i in range(1, 11) if cols[(i-1)%5].checkbox(str(i), key=
