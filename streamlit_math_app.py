@@ -9,23 +9,29 @@ css_code = """
 <style>
 .stApp { background-color: #f0f7ff; }
 
-@keyframes zoomIn { 
-    0% { transform: scale(0.5); opacity: 0; } 
-    100% { transform: scale(1); opacity: 1; } 
+/* Slide In μόνο για την πρώτη κάρτα */
+@keyframes slideInLeft {
+    0% { transform: translateX(-150%) rotate(-10deg); opacity: 0; }
+    100% { transform: translateX(0) rotate(0deg); opacity: 1; }
 }
 
-@keyframes slideOut { 
-    0% { transform: translateX(0); opacity: 1; } 
-    100% { transform: translateX(150%); opacity: 0; } 
+/* Slide Out μόνο για την τελευταία κάρτα */
+@keyframes slideOutRight {
+    0% { transform: translateX(0); opacity: 1; }
+    100% { transform: translateX(150%) rotate(10deg); opacity: 0; }
+}
+
+/* Rotate 360 μοίρες */
+@keyframes rotate360 {
+    0% { transform: rotateY(180deg); }
+    100% { transform: rotateY(360deg); }
 }
 
 .flip-card { background-color: transparent; width: 100%; height: 250px; perspective: 1000px; margin: 20px 0; }
 
-/* Εφέ μόνο για την έναρξη */
-.first-card-anim { animation: zoomIn 0.6s ease-out forwards; }
-
-/* Εφέ μόνο για τον τερματισμό */
-.last-card-anim { animation: slideOut 0.7s ease-in forwards; }
+.first-card-anim { animation: slideInLeft 0.8s ease-out forwards; }
+.last-card-anim { animation: slideOutRight 0.8s ease-in forwards; }
+.rotate-next-anim { animation: rotate360 0.6s ease-in-out forwards; }
 
 .flip-card-inner { 
     position: relative; width: 100%; height: 100%; text-align: center; 
@@ -41,7 +47,10 @@ css_code = """
 }
 
 .flip-card-front { background-color: white; color: #495057; border: 4px solid #a2d2ff; }
-.flip-card-back { background-color: #f0f9ff; color: #0077b6; border: 4px solid #00b4d8; transform: rotateY(180deg); }
+.flip-card-back { 
+    background-color: #f0f9ff; color: #0077b6; border: 4px solid #00b4d8; 
+    transform: rotateY(180deg); 
+}
 
 .score-box { 
     background-color: white; padding: 15px; border-radius: 12px; text-align: center; 
@@ -55,7 +64,7 @@ div.stButton > button:first-child[kind="primary"] {
 """
 st.markdown(css_code, unsafe_allow_html=True)
 
-# 3. Αρχικοποίηση Session State
+# 3. Session State
 if 'game_started' not in st.session_state: st.session_state.game_started = False
 if 'correct_answers' not in st.session_state: st.session_state.correct_answers = set()
 if 'current_q' not in st.session_state: st.session_state.current_q = None
@@ -71,11 +80,74 @@ if not st.session_state.game_started:
     cols = st.columns(5)
     selected = []
     for i in range(1, 11):
-        if cols[(i-1)%5].checkbox(str(i), key=f"check_{i}"):
+        if cols[(i-1)%5].checkbox(str(i), key=f"sel_{i}"):
             selected.append(i)
-    
     st.session_state.selected_numbers = selected
     
     if selected:
         if st.button("🚀 ΞΕΚΙΝΑΜΕ!", type="primary"):
-            st.
+            st.session_state.game_started = True
+            st.session_state.correct_answers = set()
+            st.session_state.current_q = None
+            st.session_state.is_finished = False
+            st.rerun()
+    else:
+        st.info("💡 Επίλεξε αριθμούς για να ξεκινήσεις!")
+
+# --- ΟΘΟΝΗ ΠΑΙΧΝΙΔΙΟΥ ---
+else:
+    all_q = [(n, i) for n in st.session_state.selected_numbers for i in range(1, 11)]
+    rem_q = [q for q in all_q if q not in st.session_state.correct_answers]
+
+    if not rem_q and not st.session_state.is_finished:
+        st.session_state.is_finished = True
+        st.rerun()
+
+    if st.session_state.is_finished:
+        st.markdown('<div class="flip-card last-card-anim"></div>', unsafe_allow_html=True)
+        st.balloons()
+        st.success("🎉 Συγχαρητήρια! Τα έμαθες όλα!")
+        if st.button("🔄 Παίξε ξανά"):
+            st.session_state.game_started = False
+            st.rerun()
+    else:
+        st.markdown(f'<div class="score-box">🟦 Σωστά: {len(st.session_state.correct_answers)} / {len(all_q)}</div>', unsafe_allow_html=True)
+        
+        if st.session_state.current_q is None:
+            st.session_state.current_q = random.choice(rem_q)
+            st.session_state.show_answer = False
+
+        n, i = st.session_state.current_q
+        
+        # Λογική Animations
+        # 1. Slide In μόνο στην πρώτη κάρτα
+        anim_class = "first-card-anim" if len(st.session_state.correct_answers) == 0 else ""
+        # 2. Η κατάσταση της περιστροφής (front/back)
+        f_class = "do-flip" if st.session_state.show_answer else ""
+
+        st.markdown(f'''
+            <div class="flip-card {anim_class}">
+              <div class="flip-card-inner {f_class}">
+                <div class="flip-card-front">{n} x {i} = ?</div>
+                <div class="flip-card-back">{n * i}</div>
+              </div>
+            </div>
+        ''', unsafe_allow_html=True)
+
+        if not st.session_state.show_answer:
+            if st.button("ΔΕΣ ΤΗΝ ΑΠΑΝΤΗΣΗ 💡"):
+                st.session_state.show_answer = True
+                st.rerun()
+        else:
+            c1, c2 = st.columns(2)
+            if c1.button("Το βρήκες! ✅"):
+                st.session_state.correct_answers.add(st.session_state.current_q)
+                st.session_state.current_q = None
+                st.rerun()
+            if c2.button("Ξαναπροσπάθησε 😉"):
+                st.session_state.current_q = None
+                st.rerun()
+
+        if st.button("⬅️ Αλλαγή Αριθμών"):
+            st.session_state.game_started = False
+            st.rerun()
