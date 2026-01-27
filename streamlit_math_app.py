@@ -4,7 +4,7 @@ import random
 # Ρύθμιση σελίδας
 st.set_page_config(page_title="Μαθαίνω την Προπαίδεια", page_icon="🧮")
 
-# CSS για την εμφάνιση με Παλ Μπλε αποχρώσεις
+# CSS για την εμφάνιση
 st.markdown("""
     <style>
     .stApp { background-color: #f0f7ff; }
@@ -32,14 +32,22 @@ st.markdown("""
     }
     .stButton>button {
         border-radius: 15px;
-        border: none;
+        font-weight: bold;
+    }
+    /* Στυλ για το κουμπί Ξεκινάμε */
+    div.stButton > button:first-child[kind="primary"] {
+        background-color: #0077b6;
+        color: white;
+        width: 100%;
+        height: 3em;
+        font-size: 20px;
     }
     </style>
     """, unsafe_allow_html=True)
 
-st.title("🧮 Το παιχνίδι της Προπαίδειας")
-
 # 1. Αρχικοποίηση Session States
+if 'game_started' not in st.session_state:
+    st.session_state.game_started = False
 if 'correct_answers' not in st.session_state:
     st.session_state.correct_answers = set()
 if 'current_q' not in st.session_state:
@@ -47,67 +55,81 @@ if 'current_q' not in st.session_state:
 if 'show_answer' not in st.session_state:
     st.session_state.show_answer = False
 
-# 2. Επιλογή Αριθμών με Ελληνικό Placeholder
-numbers = st.multiselect(
-    "Με ποιους αριθμούς θα παίξουμε σήμερα;", 
-    list(range(1, 11)), 
-    key="numbers_select",
-    placeholder="Επίλεξε έναν ή περισσότερους αριθμούς"
-)
+st.title("🧮 Το παιχνίδι της Προπαίδειας")
 
-all_possible_questions = [(n, i) for n in numbers for i in range(1, 11)]
-remaining_questions = [q for q in all_possible_questions if q not in st.session_state.correct_answers]
-
-if not numbers:
-    st.info("👈 Διάλεξε από πάνω τους αριθμούς που θέλεις να μάθεις!")
-    st.session_state.correct_answers = set()
-    st.session_state.current_q = None
-elif len(remaining_questions) == 0:
-    st.balloons()
-    st.success("🎉 Συγχαρητήρια! Έμαθες όλες τις κάρτες!")
-    if st.button("Παίξε ξανά από την αρχή"):
-        st.session_state.correct_answers = set()
-        st.session_state.current_q = None
-        st.rerun()
-else:
-    # Εμφάνιση Προόδου
-    total_q = len(all_possible_questions)
-    correct_q = len(st.session_state.correct_answers)
-    st.markdown(f'<div class="score-box">🟦 Έμαθες: <b>{correct_q}</b> από <b>{total_q}</b> κάρτες</div>', unsafe_allow_html=True)
-    st.progress(correct_q / total_q)
-
-    # Επιλογή νέας ερώτησης
-    if st.session_state.current_q is None or st.session_state.current_q not in remaining_questions:
-        st.session_state.current_q = random.choice(remaining_questions)
-        st.session_state.show_answer = False
-
-    n, i = st.session_state.current_q
+# ΟΘΟΝΗ ΕΠΙΛΟΓΗΣ (Αν το παιχνίδι ΔΕΝ έχει ξεκινήσει)
+if not st.session_state.game_started:
+    st.subheader("Ρυθμίσεις Παιχνιδιού")
+    numbers = st.multiselect(
+        "Με ποιους αριθμούς θα παίξουμε σήμερα;", 
+        list(range(1, 11)), 
+        key="numbers_select",
+        placeholder="Επίλεξε αριθμό/ους"
+    )
     
-    # Εμφάνιση Κάρτας
-    if not st.session_state.show_answer:
-        st.markdown(f'<div class="card-box" style="border-color: #a2d2ff;">{n} x {i} = ?</div>', unsafe_allow_html=True)
-        if st.button("ΔΕΣ ΤΗΝ ΑΠΑΝΤΗΣΗ 💡"):
-            st.session_state.show_answer = True
+    if numbers:
+        st.write(f"✅ Επιλέξατε την προπαίδεια του: {', '.join(map(str, numbers))}")
+        if st.button("🚀 ΞΕΚΙΝΑΜΕ!", type="primary"):
+            st.session_state.game_started = True
             st.rerun()
     else:
-        st.markdown(f'<div class="card-box" style="color: #0077b6; background-color: #f0f9ff; border-color: #00b4d8;">{n * i}</div>', unsafe_allow_html=True)
-        
-        st.write("Πώς τα πήγες;")
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            if st.button("Το βρήκες! ✅"):
-                st.session_state.correct_answers.add(st.session_state.current_q)
-                st.session_state.current_q = None
-                st.session_state.show_answer = False
-                st.rerun()
-        with col2:
-            if st.button("Ξαναπροσπάθησε 😉"):
-                st.session_state.current_q = random.choice(remaining_questions)
-                st.session_state.show_answer = False
-                st.rerun()
+        st.info("👈 Διάλεξε τους αριθμούς για να εμφανιστεί το κουμπί έναρξης!")
 
-    if st.button("Μηδενισμός Προόδου 🔄"):
-        st.session_state.correct_answers = set()
-        st.session_state.current_q = None
-        st.rerun()
+# ΟΘΟΝΗ ΠΑΙΧΝΙΔΙΟΥ (Αν το παιχνίδι ΕΧΕΙ ξεκινήσει)
+else:
+    # Παίρνουμε τους αριθμούς από το widget (χρησιμοποιώντας το key)
+    selected_numbers = st.session_state.numbers_select
+    
+    all_possible_questions = [(n, i) for n in selected_numbers for i in range(1, 11)]
+    remaining_questions = [q for q in all_possible_questions if q not in st.session_state.correct_answers]
+
+    if len(remaining_questions) == 0:
+        st.balloons()
+        st.success("🎉 Συγχαρητήρια! Έμαθες όλες τις κάρτες!")
+        if st.button("Παίξε ξανά / Άλλαξε αριθμούς"):
+            st.session_state.game_started = False
+            st.session_state.correct_answers = set()
+            st.session_state.current_q = None
+            st.rerun()
+    else:
+        # Κουμπί επιστροφής στις ρυθμίσεις
+        if st.button("⬅️ Αλλαγή Αριθμών"):
+            st.session_state.game_started = False
+            st.rerun()
+
+        # Εμφάνιση Προόδου
+        total_q = len(all_possible_questions)
+        correct_q = len(st.session_state.correct_answers)
+        st.markdown(f'<div class="score-box">🟦 Έμαθες: <b>{correct_q}</b> από <b>{total_q}</b> κάρτες</div>', unsafe_allow_html=True)
+        st.progress(correct_q / total_q)
+
+        # Επιλογή νέας ερώτησης
+        if st.session_state.current_q is None or st.session_state.current_q not in remaining_questions:
+            st.session_state.current_q = random.choice(remaining_questions)
+            st.session_state.show_answer = False
+
+        n, i = st.session_state.current_q
+        
+        # Εμφάνιση Κάρτας
+        if not st.session_state.show_answer:
+            st.markdown(f'<div class="card-box">{n} x {i} = ?</div>', unsafe_allow_html=True)
+            if st.button("ΔΕΣ ΤΗΝ ΑΠΑΝΤΗΣΗ 💡"):
+                st.session_state.show_answer = True
+                st.rerun()
+        else:
+            st.markdown(f'<div class="card-box" style="color: #0077b6; background-color: #f0f9ff; border-color: #00b4d8;">{n * i}</div>', unsafe_allow_html=True)
+            
+            st.write("Πώς τα πήγες;")
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                if st.button("Το βρήκες! ✅"):
+                    st.session_state.correct_answers.add(st.session_state.current_q)
+                    st.session_state.current_q = None
+                    st.session_state.show_answer = False
+                    st.rerun()
+            with col2:
+                if st.button("Ξαναπροσπάθησε 😉"):
+                    st.session_state.current_q = random.choice(remaining_questions)
+                    st.session_state.show_answer = False
+                    st.rerun()
