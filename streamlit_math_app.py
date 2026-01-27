@@ -52,7 +52,7 @@ numbers = st.multiselect(
     "Με ποιους αριθμούς θα παίξουμε σήμερα;", 
     list(range(1, 11)), 
     key="numbers_select",
-    placeholder="Επίλεξε αριθμό/ους"
+    placeholder="Επίλεξε έναν ή περισσότερους αριθμούς"
 )
 
 all_possible_questions = [(n, i) for n in numbers for i in range(1, 11)]
