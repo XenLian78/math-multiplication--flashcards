@@ -9,29 +9,20 @@ css_code = """
 <style>
 .stApp { background-color: #f0f7ff; }
 
-/* Slide In μόνο για την πρώτη κάρτα */
 @keyframes slideInLeft {
     0% { transform: translateX(-150%) rotate(-10deg); opacity: 0; }
     100% { transform: translateX(0) rotate(0deg); opacity: 1; }
 }
 
-/* Slide Out μόνο για την τελευταία κάρτα */
 @keyframes slideOutRight {
     0% { transform: translateX(0); opacity: 1; }
     100% { transform: translateX(150%) rotate(10deg); opacity: 0; }
-}
-
-/* Rotate 360 μοίρες */
-@keyframes rotate360 {
-    0% { transform: rotateY(180deg); }
-    100% { transform: rotateY(360deg); }
 }
 
 .flip-card { background-color: transparent; width: 100%; height: 250px; perspective: 1000px; margin: 20px 0; }
 
 .first-card-anim { animation: slideInLeft 0.8s ease-out forwards; }
 .last-card-anim { animation: slideOutRight 0.8s ease-in forwards; }
-.rotate-next-anim { animation: rotate360 0.6s ease-in-out forwards; }
 
 .flip-card-inner { 
     position: relative; width: 100%; height: 100%; text-align: center; 
@@ -71,6 +62,8 @@ if 'current_q' not in st.session_state: st.session_state.current_q = None
 if 'show_answer' not in st.session_state: st.session_state.show_answer = False
 if 'selected_numbers' not in st.session_state: st.session_state.selected_numbers = []
 if 'is_finished' not in st.session_state: st.session_state.is_finished = False
+# Μετρητής για το μοναδικό ID της κάρτας
+if 'card_id' not in st.session_state: st.session_state.card_id = 0
 
 st.title("🧮 Το παιχνίδι της Προπαίδειας")
 
@@ -90,6 +83,7 @@ if not st.session_state.game_started:
             st.session_state.correct_answers = set()
             st.session_state.current_q = None
             st.session_state.is_finished = False
+            st.session_state.card_id = 0
             st.rerun()
     else:
         st.info("💡 Επίλεξε αριθμούς για να ξεκινήσεις!")
@@ -116,17 +110,16 @@ else:
         if st.session_state.current_q is None:
             st.session_state.current_q = random.choice(rem_q)
             st.session_state.show_answer = False
+            st.session_state.card_id += 1 # Αυξάνουμε το ID για τη νέα κάρτα
 
         n, i = st.session_state.current_q
         
-        # Λογική Animations
-        # 1. Slide In μόνο στην πρώτη κάρτα
         anim_class = "first-card-anim" if len(st.session_state.correct_answers) == 0 else ""
-        # 2. Η κατάσταση της περιστροφής (front/back)
         f_class = "do-flip" if st.session_state.show_answer else ""
 
+        # Χρησιμοποιούμε το card_id στο 'id' του div για να αναγκάσουμε τον browser σε reset
         st.markdown(f'''
-            <div class="flip-card {anim_class}">
+            <div class="flip-card {anim_class}" id="card_container_{st.session_state.card_id}">
               <div class="flip-card-inner {f_class}">
                 <div class="flip-card-front">{n} x {i} = ?</div>
                 <div class="flip-card-back">{n * i}</div>
