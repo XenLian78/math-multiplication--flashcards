@@ -1,15 +1,14 @@
 import streamlit as st
 import random
 
-# Ρύθμιση σελίδας
+# 1. Ρύθμιση σελίδας
 st.set_page_config(page_title="Μαθαίνω την Προπαίδεια", page_icon="🧮")
 
-# CSS για 3D Flip, Slide In και Slide Out Animation
+# 2. CSS για 3D Flip και Slide Animation
 st.markdown("""
     <style>
     .stApp { background-color: #f0f7ff; }
     
-    /* Animation για την κάρτα που έρχεται από αριστερά */
     @keyframes slideIn {
       0% { transform: translateX(-150%) rotate(-10deg); opacity: 0; }
       100% { transform: translateX(0) rotate(0deg); opacity: 1; }
@@ -22,7 +21,7 @@ st.markdown("""
       perspective: 1000px;
       margin-top: 20px;
       margin-bottom: 20px;
-      animation: slideIn 0.5s ease-out; /* Εφέ εισόδου */
+      animation: slideIn 0.5s ease-out;
     }
 
     .flip-card-inner {
@@ -81,7 +80,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# 1. Αρχικοποίηση Session States
+# 3. Αρχικοποίηση Session States
 if 'game_started' not in st.session_state:
     st.session_state.game_started = False
 if 'correct_answers' not in st.session_state:
@@ -109,5 +108,4 @@ if not st.session_state.game_started:
     st.session_state.selected_numbers = selected
 
     if selected:
-        st.success(f"Επιλέξατε: **{', '.join(map(str, selected))}**")
-        if st.button("🚀 ΞΕΚΙΝΑΜΕ!", type="
+        st.success(f"Επιλέξατε την προπαίδεια του: **{', '.join(map(str, selected))}
