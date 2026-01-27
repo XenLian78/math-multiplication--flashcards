@@ -4,11 +4,12 @@ import random
 # Ρύθμιση σελίδας
 st.set_page_config(page_title="Μαθαίνω την Προπαίδεια", page_icon="🧮")
 
-# CSS για 3D Flip και Slide Animation
+# CSS για 3D Flip, Slide In και Slide Out Animation
 st.markdown("""
     <style>
     .stApp { background-color: #f0f7ff; }
     
+    /* Animation για την κάρτα που έρχεται από αριστερά */
     @keyframes slideIn {
       0% { transform: translateX(-150%) rotate(-10deg); opacity: 0; }
       100% { transform: translateX(0) rotate(0deg); opacity: 1; }
@@ -21,7 +22,7 @@ st.markdown("""
       perspective: 1000px;
       margin-top: 20px;
       margin-bottom: 20px;
-      animation: slideIn 0.5s ease-out;
+      animation: slideIn 0.5s ease-out; /* Εφέ εισόδου */
     }
 
     .flip-card-inner {
@@ -107,75 +108,6 @@ if not st.session_state.game_started:
     
     st.session_state.selected_numbers = selected
 
-    # Επαναφορά της οδηγίας και του κουμπιού
     if selected:
         st.success(f"Επιλέξατε: **{', '.join(map(str, selected))}**")
-        if st.button("🚀 ΞΕΚΙΝΑΜΕ!", type="primary"):
-            st.session_state.game_started = True
-            st.rerun()
-    else:
-        st.info("💡 Επίλεξε έναν ή περισσότερους αριθμούς από τους παραπάνω!")
-
-# ΟΘΟΝΗ ΠΑΙΧΝΙΔΙΟΥ
-else:
-    selected_numbers = st.session_state.selected_numbers
-    all_possible_questions = [(n, i) for n in selected_numbers for i in range(1, 11)]
-    remaining_questions = [q for q in all_possible_questions if q not in st.session_state.correct_answers]
-
-    if len(remaining_questions) == 0:
-        st.balloons()
-        st.success("🎉 Συγχαρητήρια! Τα έμαθες όλα!")
-        if st.button("🔄 Παίξε ξανά / Άλλαξε αριθμούς"):
-            st.session_state.game_started = False
-            st.session_state.correct_answers = set()
-            st.session_state.current_q = None
-            st.rerun()
-    else:
-        if st.button("⬅️ Αλλαγή Αριθμών"):
-            st.session_state.game_started = False
-            st.rerun()
-
-        total_q = len(all_possible_questions)
-        correct_q = len(st.session_state.correct_answers)
-        st.markdown(f'<div class="score-box">🟦 Έμαθες: <b>{correct_q}</b> από <b>{total_q}</b> κάρτες</div>', unsafe_allow_html=True)
-        st.progress(correct_q / total_q)
-
-        if st.session_state.current_q is None:
-            st.session_state.current_q = random.choice(remaining_questions)
-            st.session_state.show_answer = False
-
-        n, i = st.session_state.current_q
-        flip_class = "do-flip" if st.session_state.show_answer else ""
-        
-        # Το key εξασφαλίζει ότι το animation τρέχει μόνο όταν αλλάζει η ερώτηση
-        st.markdown(f"""
-            <div class="flip-card">
-              <div class="flip-card-inner {flip_class}">
-                <div class="flip-card-front">
-                  {n} x {i} = ?
-                </div>
-                <div class="flip-card-back">
-                  {n * i}
-                </div>
-              </div>
-            </div>
-        """, unsafe_allow_html=True)
-
-        if not st.session_state.show_answer:
-            if st.button("ΔΕΣ ΤΗΝ ΑΠΑΝΤΗΣΗ 💡"):
-                st.session_state.show_answer = True
-                st.rerun()
-        else:
-            st.write("Πώς τα πήγες;")
-            col1, col2 = st.columns(2)
-            with col1:
-                if st.button("Το βρήκες! ✅"):
-                    st.session_state.correct_answers.add(st.session_state.current_q)
-                    st.session_state.current_q = None
-                    st.session_state.show_answer = False
-                    st.rerun()
-            with col2:
-                if st.button("Ξαναπροσπάθησε 😉"):
-                    st.session_state.current_q = None
-                    st.session_state.show_answer = False
-                    st.rerun()
+        if st.button("🚀 ΞΕΚΙΝΑΜΕ!", type="
