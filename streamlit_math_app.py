@@ -9,6 +9,7 @@ st.markdown("""
     <style>
     .stApp { background-color: #f0f7ff; }
     
+    /* Animation εισόδου από τα αριστερά */
     @keyframes slideIn {
       0% { transform: translateX(-150%) rotate(-10deg); opacity: 0; }
       100% { transform: translateX(0) rotate(0deg); opacity: 1; }
@@ -21,7 +22,8 @@ st.markdown("""
       perspective: 1000px;
       margin-top: 20px;
       margin-bottom: 20px;
-      animation: slideIn 0.5s ease-out;
+      /* Το animation εφαρμόζεται εδώ */
+      animation: slideIn 0.5s ease-out forwards;
     }
 
     .flip-card-inner {
@@ -113,7 +115,7 @@ if not st.session_state.game_started:
             st.session_state.game_started = True
             st.rerun()
     else:
-        st.info("💡 Επίλεξε έναν ή περισσότερους αριθμούς από τους παραπάνω!")
+        st.info("💡 Διάλεξε από πάνω τους αριθμούς που θέλεις να μάθεις!")
 
 # ΟΘΟΝΗ ΠΑΙΧΝΙΔΙΟΥ
 else:
@@ -146,9 +148,12 @@ else:
         n, i = st.session_state.current_q
         flip_class = "do-flip" if st.session_state.show_answer else ""
         
-        # Το HTML της κάρτας
+        # ΠΡΟΣΟΧΗ: Το key στο <div> είναι αυτό που κάνει το animation να παίζει κάθε φορά!
+        # Χρησιμοποιούμε n, i και τον αριθμό των σωστών για να είναι πάντα μοναδικό.
+        unique_key = f"card_{n}_{i}_{len(st.session_state.correct_answers)}"
+        
         st.markdown(f"""
-            <div class="flip-card">
+            <div class="flip-card" id="{unique_key}">
               <div class="flip-card-inner {flip_class}">
                 <div class="flip-card-front">
                   {n} x {i} = ?
