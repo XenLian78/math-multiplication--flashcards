@@ -59,16 +59,4 @@ st.markdown("""
       border-radius: 25px;
       font-size: 55px;
       font-weight: bold;
-      box-shadow: 0px 8px 16px rgba(0,0,0,0.1);
-    }
-
-    .flip-card-front {
-      background-color: white;
-      color: #495057;
-      border: 4px solid #a2d2ff;
-    }
-
-    .flip-card-back {
-      background-color: #f0f9ff;
-      color: #0077b6;
-      border: 4
+      box-shadow: 0px 8px 16px rgba(0,0,0,0.1
