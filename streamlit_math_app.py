@@ -1,11 +1,10 @@
 import streamlit as st
 import random
-import time
 
 # 1. Ρύθμιση σελίδας
 st.set_page_config(page_title="Μαθαίνω την Προπαίδεια", page_icon="🧮")
 
-# 2. CSS για Σταθερότητα και Animations
+# 2. CSS για Animations
 css_code = """
 <style>
 .stApp { background-color: #f0f7ff; }
@@ -22,10 +21,10 @@ css_code = """
 
 .flip-card { background-color: transparent; width: 100%; height: 250px; perspective: 1000px; margin: 20px 0; }
 
-/* Animation μόνο για την πρώτη κάρτα */
+/* Εφέ μόνο για την έναρξη */
 .first-card-anim { animation: zoomIn 0.6s ease-out forwards; }
 
-/* Animation μόνο για τον τερματισμό */
+/* Εφέ μόνο για τον τερματισμό */
 .last-card-anim { animation: slideOut 0.7s ease-in forwards; }
 
 .flip-card-inner { 
@@ -56,7 +55,7 @@ div.stButton > button:first-child[kind="primary"] {
 """
 st.markdown(css_code, unsafe_allow_html=True)
 
-# 3. Session State
+# 3. Αρχικοποίηση Session State
 if 'game_started' not in st.session_state: st.session_state.game_started = False
 if 'correct_answers' not in st.session_state: st.session_state.correct_answers = set()
 if 'current_q' not in st.session_state: st.session_state.current_q = None
@@ -70,4 +69,13 @@ st.title("🧮 Το παιχνίδι της Προπαίδειας")
 if not st.session_state.game_started:
     st.subheader("Ποιους αριθμούς θα μάθουμε σήμερα;")
     cols = st.columns(5)
-    selected = [i for i in range(1, 11) if cols[(i-1)%5].checkbox(str(i), key=
+    selected = []
+    for i in range(1, 11):
+        if cols[(i-1)%5].checkbox(str(i), key=f"check_{i}"):
+            selected.append(i)
+    
+    st.session_state.selected_numbers = selected
+    
+    if selected:
+        if st.button("🚀 ΞΕΚΙΝΑΜΕ!", type="primary"):
+            st.
