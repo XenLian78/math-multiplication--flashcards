@@ -39,8 +39,9 @@ st.markdown("""
         background-color: #0077b6;
         color: white;
         width: 100%;
-        height: 3em;
-        font-size: 20px;
+        height: 3.5em;
+        font-size: 22px;
+        margin-top: 20px;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -54,31 +55,37 @@ if 'current_q' not in st.session_state:
     st.session_state.current_q = None
 if 'show_answer' not in st.session_state:
     st.session_state.show_answer = False
+if 'selected_numbers' not in st.session_state:
+    st.session_state.selected_numbers = []
 
 st.title("🧮 Το παιχνίδι της Προπαίδειας")
 
-# ΟΘΟΝΗ ΕΠΙΛΟΓΗΣ (Αν το παιχνίδι ΔΕΝ έχει ξεκινήσει)
+# ΟΘΟΝΗ ΕΠΙΛΟΓΗΣ
 if not st.session_state.game_started:
-    st.subheader("Ρυθμίσεις Παιχνιδιού")
-    numbers = st.multiselect(
-        "Με ποιους αριθμούς θα παίξουμε σήμερα;", 
-        list(range(1, 11)), 
-        key="numbers_select",
-        placeholder="Επίλεξε αριθμό/ους"
-    )
+    st.subheader("Ποιους αριθμούς θα μάθουμε σήμερα;")
+    st.write("Επίλεξε έναν ή περισσότερους αριθμούς:")
     
-    if numbers:
-        st.write(f"✅ Επιλέξατε την προπαίδεια του: {', '.join(map(str, numbers))}")
+    # Δημιουργία Grid με Checkboxes για να μην έχουμε drop-down
+    cols = st.columns(5)
+    selected = []
+    for i in range(1, 11):
+        with cols[(i-1)%5]:
+            if st.checkbox(str(i), key=f"num_{i}"):
+                selected.append(i)
+    
+    st.session_state.selected_numbers = selected
+
+    if selected:
+        st.markdown(f"### Έχεις επιλέξει: **{', '.join(map(str, selected))}**")
         if st.button("🚀 ΞΕΚΙΝΑΜΕ!", type="primary"):
             st.session_state.game_started = True
             st.rerun()
     else:
-        st.info("👈 Διάλεξε τους αριθμούς για να εμφανιστεί το κουμπί έναρξης!")
+        st.info("💡 Κάνε κλικ στους αριθμούς που θέλεις να παίξεις!")
 
-# ΟΘΟΝΗ ΠΑΙΧΝΙΔΙΟΥ (Αν το παιχνίδι ΕΧΕΙ ξεκινήσει)
+# ΟΘΟΝΗ ΠΑΙΧΝΙΔΙΟΥ
 else:
-    # Παίρνουμε τους αριθμούς από το widget (χρησιμοποιώντας το key)
-    selected_numbers = st.session_state.numbers_select
+    selected_numbers = st.session_state.selected_numbers
     
     all_possible_questions = [(n, i) for n in selected_numbers for i in range(1, 11)]
     remaining_questions = [q for q in all_possible_questions if q not in st.session_state.correct_answers]
@@ -86,13 +93,13 @@ else:
     if len(remaining_questions) == 0:
         st.balloons()
         st.success("🎉 Συγχαρητήρια! Έμαθες όλες τις κάρτες!")
-        if st.button("Παίξε ξανά / Άλλαξε αριθμούς"):
+        if st.button("🔄 Παίξε ξανά / Άλλαξε αριθμούς"):
             st.session_state.game_started = False
             st.session_state.correct_answers = set()
             st.session_state.current_q = None
             st.rerun()
     else:
-        # Κουμπί επιστροφής στις ρυθμίσεις
+        # Κουμπί επιστροφής
         if st.button("⬅️ Αλλαγή Αριθμών"):
             st.session_state.game_started = False
             st.rerun()
