@@ -90,22 +90,3 @@ if 'current_q' not in st.session_state:
 if 'show_answer' not in st.session_state:
     st.session_state.show_answer = False
 if 'selected_numbers' not in st.session_state:
-    st.session_state.selected_numbers = []
-
-st.title("🧮 Το παιχνίδι της Προπαίδειας")
-
-# ΟΘΟΝΗ ΕΠΙΛΟΓΗΣ
-if not st.session_state.game_started:
-    st.subheader("Ποιους αριθμούς θα μάθουμε σήμερα;")
-    
-    cols = st.columns(5)
-    selected = []
-    for i in range(1, 11):
-        with cols[(i-1)%5]:
-            if st.checkbox(str(i), key=f"num_{i}"):
-                selected.append(i)
-    
-    st.session_state.selected_numbers = selected
-
-    if selected:
-        st.success(f"Επιλέξατε την προπαίδεια του: **{', '.join(map(str, selected))"}
