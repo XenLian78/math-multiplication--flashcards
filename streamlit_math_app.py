@@ -1,15 +1,21 @@
 import streamlit as st
 import random
+import time
 
 # Ρύθμιση σελίδας
 st.set_page_config(page_title="Μαθαίνω την Προπαίδεια", page_icon="🧮")
 
-# CSS για το 3D Flip Effect
+# CSS για 3D Flip και Slide Animation
 st.markdown("""
     <style>
     .stApp { background-color: #f0f7ff; }
     
-    /* Ρυθμίσεις για το εφέ περιστροφής */
+    /* Animation για την κάρτα που μπαίνει (Slide In) */
+    @keyframes slideIn {
+      0% { transform: translateX(-150%) rotate(-10deg); opacity: 0; }
+      100% { transform: translateX(0) rotate(0deg); opacity: 1; }
+    }
+
     .flip-card {
       background-color: transparent;
       width: 100%;
@@ -17,6 +23,7 @@ st.markdown("""
       perspective: 1000px;
       margin-top: 20px;
       margin-bottom: 20px;
+      animation: slideIn 0.5s ease-out; /* Εφαρμογή του slide in */
     }
 
     .flip-card-inner {
@@ -28,10 +35,7 @@ st.markdown("""
       transform-style: preserve-3d;
     }
 
-    /* Η κλάση που ενεργοποιεί το γύρισμα */
-    .do-flip {
-      transform: rotateY(180deg);
-    }
+    .do-flip { transform: rotateY(180deg); }
 
     .flip-card-front, .flip-card-back {
       position: absolute;
@@ -132,17 +136,19 @@ else:
         st.markdown(f'<div class="score-box">🟦 Έμαθες: <b>{correct_q}</b> από <b>{total_q}</b> κάρτες</div>', unsafe_allow_html=True)
         st.progress(correct_q / total_q)
 
-        if st.session_state.current_q is None or st.session_state.current_q not in remaining_questions:
+        # Επιλογή νέας ερώτησης
+        if st.session_state.current_q is None:
             st.session_state.current_q = random.choice(remaining_questions)
             st.session_state.show_answer = False
 
         n, i = st.session_state.current_q
         
-        # ΕΦΑΡΜΟΓΗ ΤΟΥ FLIP EFFECT
+        # Εμφάνιση Κάρτας με το εφέ
         flip_class = "do-flip" if st.session_state.show_answer else ""
         
+        # Χρησιμοποιούμε το κλειδί της ερώτησης για να αναγκάσουμε το CSS animation να ξανατρέξει σε κάθε νέα κάρτα
         st.markdown(f"""
-            <div class="flip-card">
+            <div class="flip-card" key="{n}_{i}">
               <div class="flip-card-inner {flip_class}">
                 <div class="flip-card-front">
                   {n} x {i} = ?
@@ -164,9 +170,11 @@ else:
             with col1:
                 if st.button("Το βρήκες! ✅"):
                     st.session_state.correct_answers.add(st.session_state.current_q)
-                    st.session_state.current_q = None
+                    st.session_state.current_q = None # Μηδενισμός για να έρθει νέα
                     st.session_state.show_answer = False
                     st.rerun()
             with col2:
                 if st.button("Ξαναπροσπάθησε 😉"):
-                    st.session_state.current_q = random.choice(remaining_questions)
+                    st.session_state.current_q = None # Μηδενισμός για να έρθει νέα
+                    st.session_state.show_answer = False
+                    st.rerun()
