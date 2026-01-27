@@ -89,4 +89,4 @@ if 'current_q' not in st.session_state:
     st.session_state.current_q = None
 if 'show_answer' not in st.session_state:
     st.session_state.show_answer = False
-if 'selected_numbers' not in st.session_state:
+    if 'selected_numbers' not in st.session_state:
