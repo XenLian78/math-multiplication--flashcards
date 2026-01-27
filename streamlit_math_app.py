@@ -4,22 +4,63 @@ import random
 # Ρύθμιση σελίδας
 st.set_page_config(page_title="Μαθαίνω την Προπαίδεια", page_icon="🧮")
 
-# CSS για την εμφάνιση
+# CSS για το 3D Flip Effect
 st.markdown("""
     <style>
     .stApp { background-color: #f0f7ff; }
-    .card-box {
-        background-color: white;
-        padding: 40px;
-        border-radius: 25px;
-        border: 4px solid #a2d2ff;
-        text-align: center;
-        font-size: 55px;
-        font-weight: bold;
-        color: #495057;
-        box-shadow: 0px 8px 16px rgba(0,0,0,0.05);
-        margin: 20px 0px;
+    
+    /* Ρυθμίσεις για το εφέ περιστροφής */
+    .flip-card {
+      background-color: transparent;
+      width: 100%;
+      height: 250px;
+      perspective: 1000px;
+      margin-top: 20px;
+      margin-bottom: 20px;
     }
+
+    .flip-card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+    }
+
+    /* Η κλάση που ενεργοποιεί το γύρισμα */
+    .do-flip {
+      transform: rotateY(180deg);
+    }
+
+    .flip-card-front, .flip-card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 25px;
+      font-size: 55px;
+      font-weight: bold;
+      box-shadow: 0px 8px 16px rgba(0,0,0,0.1);
+    }
+
+    .flip-card-front {
+      background-color: white;
+      color: #495057;
+      border: 4px solid #a2d2ff;
+    }
+
+    .flip-card-back {
+      background-color: #f0f9ff;
+      color: #0077b6;
+      border: 4px solid #00b4d8;
+      transform: rotateY(180deg);
+    }
+
     .score-box {
         background-color: #ffffff;
         padding: 15px;
@@ -28,20 +69,11 @@ st.markdown("""
         font-size: 18px;
         border: 2px solid #bde0fe;
         color: #0077b6;
-        margin-bottom: 10px;
     }
-    .stButton>button {
-        border-radius: 15px;
-        font-weight: bold;
-    }
-    /* Στυλ για το κουμπί Ξεκινάμε */
+    
+    .stButton>button { border-radius: 15px; font-weight: bold; }
     div.stButton > button:first-child[kind="primary"] {
-        background-color: #0077b6;
-        color: white;
-        width: 100%;
-        height: 3.5em;
-        font-size: 22px;
-        margin-top: 20px;
+        background-color: #0077b6; color: white; width: 100%; height: 3.5em; font-size: 22px;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -63,9 +95,6 @@ st.title("🧮 Το παιχνίδι της Προπαίδειας")
 # ΟΘΟΝΗ ΕΠΙΛΟΓΗΣ
 if not st.session_state.game_started:
     st.subheader("Ποιους αριθμούς θα μάθουμε σήμερα;")
-    st.write("Επίλεξε έναν ή περισσότερους αριθμούς:")
-    
-    # Δημιουργία Grid με Checkboxes για να μην έχουμε drop-down
     cols = st.columns(5)
     selected = []
     for i in range(1, 11):
@@ -76,59 +105,62 @@ if not st.session_state.game_started:
     st.session_state.selected_numbers = selected
 
     if selected:
-        st.markdown(f"### Έχεις επιλέξει: **{', '.join(map(str, selected))}**")
         if st.button("🚀 ΞΕΚΙΝΑΜΕ!", type="primary"):
             st.session_state.game_started = True
             st.rerun()
-    else:
-        st.info("💡 Κάνε κλικ στους αριθμούς που θέλεις να παίξεις!")
 
 # ΟΘΟΝΗ ΠΑΙΧΝΙΔΙΟΥ
 else:
     selected_numbers = st.session_state.selected_numbers
-    
     all_possible_questions = [(n, i) for n in selected_numbers for i in range(1, 11)]
     remaining_questions = [q for q in all_possible_questions if q not in st.session_state.correct_answers]
 
     if len(remaining_questions) == 0:
         st.balloons()
-        st.success("🎉 Συγχαρητήρια! Έμαθες όλες τις κάρτες!")
-        if st.button("🔄 Παίξε ξανά / Άλλαξε αριθμούς"):
+        st.success("🎉 Συγχαρητήρια!")
+        if st.button("🔄 Παίξε ξανά"):
             st.session_state.game_started = False
             st.session_state.correct_answers = set()
-            st.session_state.current_q = None
             st.rerun()
     else:
-        # Κουμπί επιστροφής
         if st.button("⬅️ Αλλαγή Αριθμών"):
             st.session_state.game_started = False
             st.rerun()
 
-        # Εμφάνιση Προόδου
         total_q = len(all_possible_questions)
         correct_q = len(st.session_state.correct_answers)
         st.markdown(f'<div class="score-box">🟦 Έμαθες: <b>{correct_q}</b> από <b>{total_q}</b> κάρτες</div>', unsafe_allow_html=True)
         st.progress(correct_q / total_q)
 
-        # Επιλογή νέας ερώτησης
         if st.session_state.current_q is None or st.session_state.current_q not in remaining_questions:
             st.session_state.current_q = random.choice(remaining_questions)
             st.session_state.show_answer = False
 
         n, i = st.session_state.current_q
         
-        # Εμφάνιση Κάρτας
+        # ΕΦΑΡΜΟΓΗ ΤΟΥ FLIP EFFECT
+        flip_class = "do-flip" if st.session_state.show_answer else ""
+        
+        st.markdown(f"""
+            <div class="flip-card">
+              <div class="flip-card-inner {flip_class}">
+                <div class="flip-card-front">
+                  {n} x {i} = ?
+                </div>
+                <div class="flip-card-back">
+                  {n * i}
+                </div>
+              </div>
+            </div>
+        """, unsafe_allow_html=True)
+
         if not st.session_state.show_answer:
-            st.markdown(f'<div class="card-box">{n} x {i} = ?</div>', unsafe_allow_html=True)
             if st.button("ΔΕΣ ΤΗΝ ΑΠΑΝΤΗΣΗ 💡"):
                 st.session_state.show_answer = True
                 st.rerun()
         else:
-            st.markdown(f'<div class="card-box" style="color: #0077b6; background-color: #f0f9ff; border-color: #00b4d8;">{n * i}</div>', unsafe_allow_html=True)
-            
             st.write("Πώς τα πήγες;")
             col1, col2 = st.columns(2)
-            
             with col1:
                 if st.button("Το βρήκες! ✅"):
                     st.session_state.correct_answers.add(st.session_state.current_q)
@@ -138,5 +170,3 @@ else:
             with col2:
                 if st.button("Ξαναπροσπάθησε 😉"):
                     st.session_state.current_q = random.choice(remaining_questions)
-                    st.session_state.show_answer = False
-                    st.rerun()
