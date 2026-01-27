@@ -10,13 +10,11 @@ st.markdown("""
     <style>
     .stApp { background-color: #f0f7ff; }
     
-    /* Animation Εισόδου (Slide In) */
     @keyframes slideIn {
       0% { transform: translateX(-150%) rotate(-10deg); opacity: 0; }
       100% { transform: translateX(0) rotate(0deg); opacity: 1; }
     }
 
-    /* Animation Εξόδου (Slide Out) */
     @keyframes slideOut {
       0% { transform: translateX(0) rotate(0deg); opacity: 1; }
       100% { transform: translateX(150%) rotate(10deg); opacity: 0; }
@@ -31,12 +29,10 @@ st.markdown("""
       margin-bottom: 20px;
     }
 
-    /* Κλάση για την είσοδο */
     .slide-in-active {
       animation: slideIn 0.6s ease-out forwards;
     }
 
-    /* Κλάση για την έξοδο */
     .slide-out-active {
       animation: slideOut 0.6s ease-in forwards !important;
     }
@@ -56,7 +52,6 @@ st.markdown("""
       position: absolute;
       width: 100%;
       height: 100%;
-      -webkit-backface-visibility: hidden;
       backface-visibility: hidden;
       display: flex;
       align-items: center;
@@ -130,7 +125,7 @@ if not st.session_state.game_started:
             st.session_state.game_started = True
             st.rerun()
     else:
-        st.info("💡 Διάλεξε από πάνω τους αριθμούς που θέλεις να μάθεις!")
+        st.info("💡 Επίλεξε έναν ή περισσότερους αριθμούς από τους παραπάνω!")
 
 # ΟΘΟΝΗ ΠΑΙΧΝΙΔΙΟΥ
 else:
@@ -138,7 +133,7 @@ else:
     all_possible_questions = [(n, i) for n in selected_numbers for i in range(1, 11)]
     remaining_questions = [q for q in all_possible_questions if q not in st.session_state.correct_answers]
 
-    if len(remaining_questions) == 0:
+    if not remaining_questions:
         st.balloons()
         st.success("🎉 Συγχαρητήρια! Τα έμαθες όλα!")
         if st.button("🔄 Παίξε ξανά"):
@@ -156,6 +151,7 @@ else:
         st.markdown(f'<div class="score-box">🟦 Έμαθες: <b>{correct_q}</b> από <b>{total_q}</b> κάρτες</div>', unsafe_allow_html=True)
         st.progress(correct_q / total_q)
 
+        # Επιλογή νέας ερώτησης αν δεν υπάρχει
         if st.session_state.current_q is None:
             st.session_state.current_q = random.choice(remaining_questions)
             st.session_state.show_answer = False
@@ -163,10 +159,11 @@ else:
 
         n, i = st.session_state.current_q
         
-        # Λογική κλάσεων CSS
+        # Καθορισμός κλάσεων animation
         flip_class = "do-flip" if st.session_state.show_answer else ""
         animation_class = "slide-out-active" if st.session_state.is_exiting else "slide-in-active"
         
+        # HTML Κάρτας
         st.markdown(f"""
             <div class="flip-card {animation_class}">
               <div class="flip-card-inner {flip_class}">
@@ -176,31 +173,29 @@ else:
             </div>
         """, unsafe_allow_html=True)
 
-        if not st.session_state.show_answer:
+        if not st.session_state.show_answer and not st.session_state.is_exiting:
             if st.button("ΔΕΣ ΤΗΝ ΑΠΑΝΤΗΣΗ 💡"):
                 st.session_state.show_answer = True
                 st.rerun()
-        else:
+        elif st.session_state.show_answer and not st.session_state.is_exiting:
             st.write("Πώς τα πήγες;")
             col1, col2 = st.columns(2)
             
-            with col1:
-                if st.button("Το βρήκες! ✅"):
-                    st.session_state.is_exiting = True
-                    st.rerun() # Ξανατρέχει για να δείξει το Slide Out
-            
-            with col2:
-                if st.button("Ξαναπροσπάθησε 😉"):
-                    st.session_state.is_exiting = True
-                    st.rerun()
-
-            # Αν ενεργοποιήθηκε η έξοδος, περίμενε λίγο και μετά άλλαξε ερώτηση
-            if st.session_state.is_exiting:
-                time.sleep(0.6) # Χρόνος για να προλάβει να φύγει η κάρτα
-                if "Το βρήκες! ✅" in st.session_state: # (Απλή λογική ελέγχου κουμπιού)
-                    pass 
-                # Ενημέρωση σκορ και ερώτησης
+            if col1.button("Το βρήκες! ✅"):
+                st.session_state.is_exiting = True
+                # Πρώτα προσθέτουμε στα σωστά
                 st.session_state.correct_answers.add(st.session_state.current_q)
-                st.session_state.current_q = None
-                st.session_state.is_exiting = False
                 st.rerun()
+            
+            if col2.button("Ξαναπροσπάθησε 😉"):
+                st.session_state.is_exiting = True
+                st.rerun()
+
+        # Η κρίσιμη διόρθωση: 
+        # Όταν η κάρτα είναι σε φάση Slide Out, περιμένουμε και μετά ΜΗΔΕΝΙΖΟΥΜΕ τα πάντα
+        if st.session_state.is_exiting:
+            time.sleep(0.6)
+            st.session_state.current_q = None # Αυτό θα προκαλέσει επιλογή νέας ερώτησης στο επόμενο rerun
+            st.session_state.show_answer = False # Η νέα κάρτα θα ξεκινήσει από την "μπροστά" πλευρά
+            st.session_state.is_exiting = False
+            st.rerun()
