@@ -2,94 +2,145 @@ import streamlit as st
 import random
 
 # 1. Ρύθμιση σελίδας
-st.set_page_config(page_title="Math Tablet", page_icon="📱", layout="centered")
+st.set_page_config(page_title="Μαθαίνω την Προπαίδεια", page_icon="🧮")
 
-# 2. Ασφαλές CSS (χωρίς τριπλά εισαγωγικά για αποφυγή Syntax Errors)
-css = "<style>"
-css += "body { background-color: #eef2f5; }"
-css += ".tablet-container { background: #2c2c2e; padding: 20px; border-radius: 40px; box-shadow: 0px 20px 40px rgba(0,0,0,0.3); max-width: 500px; margin: auto; border: 4px solid #3a3a3c; }"
-css += ".tablet-screen { background: white; border-radius: 20px; padding: 30px; text-align: center; min-height: 350px; display: flex; flex-direction: column; justify-content: space-between; }"
-css += ".question-text { font-size: 60px; font-weight: 800; color: #1c1c1e; margin-top: 20px; }"
-css += ".answer-box { position: relative; background: #f2f2f7; border-radius: 15px; height: 120px; display: flex; align-items: center; justify-content: center; font-size: 50px; font-weight: bold; color: #007aff; overflow: hidden; }"
-css += ".smart-cover { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #007aff; color: white; display: flex; align-items: center; justify-content: center; font-size: 40px; transition: transform 0.4s ease-in-out; z-index: 10; }"
-css += ".cover-open { transform: translateY(-110%); }"
-css += ".stButton>button { border-radius: 12px; height: 3em; font-weight: 600; }"
-css += ".score-badge { background: #e5e5ea; padding: 5px 15px; border-radius: 20px; font-size: 14px; color: #8e8e93; }"
-css += "</style>"
-st.markdown(css, unsafe_allow_html=True)
+# 2. CSS για Animations
+css_code = """
+<style>
+.stApp { background-color: #f0f7ff; }
+
+@keyframes slideInLeft {
+    0% { transform: translateX(-150%) rotate(-10deg); opacity: 0; }
+    100% { transform: translateX(0) rotate(0deg); opacity: 1; }
+}
+
+@keyframes slideOutRight {
+    0% { transform: translateX(0); opacity: 1; }
+    100% { transform: translateX(150%) rotate(10deg); opacity: 0; }
+}
+
+.flip-card { background-color: transparent; width: 100%; height: 250px; perspective: 1000px; margin: 20px 0; }
+
+.first-card-anim { animation: slideInLeft 0.8s ease-out forwards; }
+.last-card-anim { animation: slideOutRight 0.8s ease-in forwards; }
+
+.flip-card-inner { 
+    position: relative; width: 100%; height: 100%; text-align: center; 
+    transition: transform 0.6s; transform-style: preserve-3d; 
+}
+
+.do-flip { transform: rotateY(180deg); }
+
+.flip-card-front, .flip-card-back { 
+    position: absolute; width: 100%; height: 100%; backface-visibility: hidden; 
+    display: flex; align-items: center; justify-content: center; border-radius: 25px; 
+    font-size: 55px; font-weight: bold; box-shadow: 0px 8px 16px rgba(0,0,0,0.1); 
+}
+
+.flip-card-front { background-color: white; color: #495057; border: 4px solid #a2d2ff; }
+.flip-card-back { 
+    background-color: #f0f9ff; color: #0077b6; border: 4px solid #00b4d8; 
+    transform: rotateY(180deg); 
+}
+
+.score-box { 
+    background-color: white; padding: 15px; border-radius: 12px; text-align: center; 
+    font-size: 18px; border: 2px solid #bde0fe; color: #0077b6; margin-bottom: 10px; 
+}
+.stButton>button { border-radius: 15px; font-weight: bold; }
+div.stButton > button:first-child[kind="primary"] { 
+    background-color: #0077b6; color: white; width: 100%; height: 3.5em; font-size: 22px; 
+}
+</style>
+"""
+st.markdown(css_code, unsafe_allow_html=True)
 
 # 3. Session State
-if 'game_active' not in st.session_state: st.session_state.game_active = False
-if 'correct_ones' not in st.session_state: st.session_state.correct_ones = set()
+if 'game_started' not in st.session_state: st.session_state.game_started = False
+if 'correct_answers' not in st.session_state: st.session_state.correct_answers = set()
 if 'current_q' not in st.session_state: st.session_state.current_q = None
-if 'reveal' not in st.session_state: st.session_state.reveal = False
-if 'nums' not in st.session_state: st.session_state.nums = []
+if 'show_answer' not in st.session_state: st.session_state.show_answer = False
+if 'selected_numbers' not in st.session_state: st.session_state.selected_numbers = []
+if 'is_finished' not in st.session_state: st.session_state.is_finished = False
+# Μετρητής για το μοναδικό ID της κάρτας
+if 'card_id' not in st.session_state: st.session_state.card_id = 0
 
-# --- ΑΡΧΙΚΗ ΟΘΟΝΗ ---
-if not st.session_state.game_active:
-    st.title("📱 Math Tablet")
-    st.subheader("Διάλεξε προπαίδεια:")
+st.title("🧮 Το παιχνίδι της Προπαίδειας")
+
+# --- ΟΘΟΝΗ ΕΠΙΛΟΓΗΣ ---
+if not st.session_state.game_started:
+    st.subheader("Ποιους αριθμούς θα μάθουμε σήμερα;")
     cols = st.columns(5)
     selected = []
     for i in range(1, 11):
-        if cols[(i-1)%5].checkbox(str(i), key=f"n{i}"):
+        if cols[(i-1)%5].checkbox(str(i), key=f"sel_{i}"):
             selected.append(i)
+    st.session_state.selected_numbers = selected
     
     if selected:
-        if st.button("ΕΚΚΙΝΗΣΗ TABLET 🚀", type="primary", use_container_width=True):
-            st.session_state.nums = selected
-            st.session_state.game_active = True
-            st.session_state.correct_ones = set()
+        if st.button("🚀 ΞΕΚΙΝΑΜΕ!", type="primary"):
+            st.session_state.game_started = True
+            st.session_state.correct_answers = set()
             st.session_state.current_q = None
+            st.session_state.is_finished = False
+            st.session_state.card_id = 0
             st.rerun()
     else:
-        st.info("Επίλεξε αριθμούς για να ξεκινήσεις!")
+        st.info("💡 Επίλεξε αριθμούς για να ξεκινήσεις!")
 
 # --- ΟΘΟΝΗ ΠΑΙΧΝΙΔΙΟΥ ---
 else:
-    all_qs = [(n, i) for n in st.session_state.nums for i in range(1, 11)]
-    todo = [q for q in all_qs if q not in st.session_state.correct_ones]
+    all_q = [(n, i) for n in st.session_state.selected_numbers for i in range(1, 11)]
+    rem_q = [q for q in all_q if q not in st.session_state.correct_answers]
 
-    if not todo:
+    if not rem_q and not st.session_state.is_finished:
+        st.session_state.is_finished = True
+        st.rerun()
+
+    if st.session_state.is_finished:
+        st.markdown('<div class="flip-card last-card-anim"></div>', unsafe_allow_html=True)
         st.balloons()
-        st.success("🎉 Μπράβο! Ολοκλήρωσες όλες τις ασκήσεις!")
-        if st.button("Παίξε ξανά"):
-            st.session_state.game_active = False
+        st.success("🎉 Συγχαρητήρια! Τα έμαθες όλα!")
+        if st.button("🔄 Παίξε ξανά"):
+            st.session_state.game_started = False
             st.rerun()
     else:
+        st.markdown(f'<div class="score-box">🟦 Σωστά: {len(st.session_state.correct_answers)} / {len(all_q)}</div>', unsafe_allow_html=True)
+        
         if st.session_state.current_q is None:
-            st.session_state.current_q = random.choice(todo)
-            st.session_state.reveal = False
+            st.session_state.current_q = random.choice(rem_q)
+            st.session_state.show_answer = False
+            st.session_state.card_id += 1 # Αυξάνουμε το ID για τη νέα κάρτα
 
         n, i = st.session_state.current_q
-        cover_class = "cover-open" if st.session_state.reveal else ""
-
-        # Σχεδιασμός Tablet (Modern UX)
-        tablet_html = f'<div class="tablet-container"><div class="tablet-screen">'
-        tablet_html += f'<div class="score-badge">Πρόοδος: {len(st.session_state.correct_ones)} / {len(all_qs)}</div>'
-        tablet_html += f'<div class="question-text">{n} × {i}</div>'
-        tablet_html += f'<div class="answer-box"><div class="smart-cover {cover_class}">?</div>{n * i}</div>'
-        tablet_html += '</div></div>'
         
-        st.markdown(tablet_html, unsafe_allow_html=True)
-        st.write("") 
+        anim_class = "first-card-anim" if len(st.session_state.correct_answers) == 0 else ""
+        f_class = "do-flip" if st.session_state.show_answer else ""
 
-        if not st.session_state.reveal:
-            if st.button("ΔΕΣ ΤΗΝ ΑΠΑΝΤΗΣΗ 💡", type="primary", use_container_width=True):
-                st.session_state.reveal = True
+        # Χρησιμοποιούμε το card_id στο 'id' του div για να αναγκάσουμε τον browser σε reset
+        st.markdown(f'''
+            <div class="flip-card {anim_class}" id="card_container_{st.session_state.card_id}">
+              <div class="flip-card-inner {f_class}">
+                <div class="flip-card-front">{n} x {i} = ?</div>
+                <div class="flip-card-back">{n * i}</div>
+              </div>
+            </div>
+        ''', unsafe_allow_html=True)
+
+        if not st.session_state.show_answer:
+            if st.button("ΔΕΣ ΤΗΝ ΑΠΑΝΤΗΣΗ 💡"):
+                st.session_state.show_answer = True
                 st.rerun()
         else:
             c1, c2 = st.columns(2)
-            if c1.button("✅ Το βρήκα!", use_container_width=True):
-                st.session_state.correct_ones.add(st.session_state.current_q)
+            if c1.button("Το βρήκες! ✅"):
+                st.session_state.correct_answers.add(st.session_state.current_q)
                 st.session_state.current_q = None
-                st.session_state.reveal = False
                 st.rerun()
-            if c2.button("❌ Λάθος", use_container_width=True):
+            if c2.button("Ξαναπροσπάθησε 😉"):
                 st.session_state.current_q = None
-                st.session_state.reveal = False
                 st.rerun()
 
-        if st.button("⬅️ Πίσω στο Μενού", use_container_width=True):
-            st.session_state.game_active = False
+        if st.button("⬅️ Αλλαγή Αριθμών"):
+            st.session_state.game_started = False
             st.rerun()
