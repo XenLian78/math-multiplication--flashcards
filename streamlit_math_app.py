@@ -5,24 +5,26 @@ import time
 # 1. Ρύθμιση σελίδας
 st.set_page_config(page_title="Μαθαίνω την Προπαίδεια", page_icon="🧮")
 
-# 2. CSS (Συμπτυγμένο σε f-string για να αποφύγουμε Syntax Errors)
-css = """<style>
+# 2. CSS για Animations (Συμπτυγμένο για αποφυγή σφαλμάτων Syntax)
+css_code = """
+<style>
 .stApp { background-color: #f0f7ff; }
-@keyframes zoomIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes zoomIn { 0% { transform: scale(0.3); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 @keyframes slideOut { 0% { transform: translateX(0); opacity: 1; } 100% { transform: translateX(150%); opacity: 0; } }
 .flip-card { background-color: transparent; width: 100%; height: 250px; perspective: 1000px; margin: 20px 0; }
-.zoom-in-active { animation: zoomIn 0.6s ease-out forwards; }
+.zoom-in-active { animation: zoomIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
 .slide-out-active { animation: slideOut 0.7s ease-in forwards; }
 .flip-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s; transform-style: preserve-3d; }
 .do-flip { transform: rotateY(180deg); }
 .flip-card-front, .flip-card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; border-radius: 25px; font-size: 55px; font-weight: bold; box-shadow: 0px 8px 16px rgba(0,0,0,0.1); }
 .flip-card-front { background-color: white; color: #495057; border: 4px solid #a2d2ff; }
 .flip-card-back { background-color: #f0f9ff; color: #0077b6; border: 4px solid #00b4d8; transform: rotateY(180deg); }
-.score-box { background-color: white; padding: 15px; border-radius: 12px; text-align: center; font-size: 18px; border: 2px solid #bde0fe; color: #0077b6; }
+.score-box { background-color: white; padding: 15px; border-radius: 12px; text-align: center; font-size: 18px; border: 2px solid #bde0fe; color: #0077b6; margin-bottom: 10px; }
 .stButton>button { border-radius: 15px; font-weight: bold; }
 div.stButton > button:first-child[kind="primary"] { background-color: #0077b6; color: white; width: 100%; height: 3.5em; font-size: 22px; }
-</style>"""
-st.markdown(css, unsafe_allow_html=True)
+</style>
+"""
+st.markdown(css_code, unsafe_allow_html=True)
 
 # 3. Session State
 if 'game_started' not in st.session_state: st.session_state.game_started = False
@@ -31,7 +33,7 @@ if 'current_q' not in st.session_state: st.session_state.current_q = None
 if 'show_answer' not in st.session_state: st.session_state.show_answer = False
 if 'selected_numbers' not in st.session_state: st.session_state.selected_numbers = []
 if 'is_exiting' not in st.session_state: st.session_state.is_exiting = False
-if 'card_id' not in st.session_state: st.session_state.card_id = 0
+if 'q_counter' not in st.session_state: st.session_state.q_counter = 0
 
 st.title("🧮 Το παιχνίδι της Προπαίδειας")
 
@@ -42,14 +44,15 @@ if not st.session_state.game_started:
     selected = []
     for i in range(1, 11):
         with cols[(i-1)%5]:
-            if st.checkbox(str(i), key=f"s_{i}"): selected.append(i)
+            if st.checkbox(str(i), key=f"select_{i}"): selected.append(i)
     st.session_state.selected_numbers = selected
     if selected:
         st.success(f"Επιλέξατε την προπαίδεια του: {selected}")
         if st.button("🚀 ΞΕΚΙΝΑΜΕ!", type="primary"):
             st.session_state.game_started = True
+            st.session_state.q_counter = 1
             st.rerun()
-    else: st.info("💡 Επίλεξε αριθμούς!")
+    else: st.info("💡 Επίλεξε αριθμούς για να ξεκινήσεις!")
 
 # --- ΟΘΟΝΗ ΠΑΙΧΝΙΔΙΟΥ ---
 else:
@@ -58,28 +61,31 @@ else:
 
     if not rem_q and not st.session_state.is_exiting:
         st.balloons()
-        st.success("🎉 Συγχαρητήρια!")
-        if st.button("🔄 Ξανά"):
+        st.success("🎉 Συγχαρητήρια! Τα έμαθες όλα!")
+        if st.button("🔄 Παίξε ξανά"):
             st.session_state.game_started = False
             st.session_state.correct_answers = set()
+            st.session_state.current_q = None
             st.rerun()
     else:
-        # Σκορ
-        st.markdown(f'<div class="score-box">🟦 Σκορ: {len(st.session_state.correct_answers)} / {len(all_q)}</div>', unsafe_allow_html=True)
+        # Εμφάνιση Σκορ
+        st.markdown(f'<div class="score-box">🟦 Σωστά: {len(st.session_state.correct_answers)} / {len(all_q)}</div>', unsafe_allow_html=True)
         
+        # Επιλογή Ερώτησης
         if st.session_state.current_q is None:
             st.session_state.current_q = random.choice(rem_q)
             st.session_state.show_answer = False
             st.session_state.is_exiting = False
-            st.session_state.card_id += 1
 
         n, i = st.session_state.current_q
+        
+        # Animations και Classes
+        # Σημαντικό: Το id="card_{st.session_state.q_counter}" αναγκάζει τον browser σε reset
         f_class = "do-flip" if st.session_state.show_answer else ""
         a_class = "slide-out-active" if st.session_state.is_exiting else "zoom-in-active"
 
-        # HTML Κάρτας
         st.markdown(f'''
-            <div class="flip-card {a_class}" id="card_{st.session_state.card_id}">
+            <div class="flip-card {a_class}" id="card_{st.session_state.q_counter}">
               <div class="flip-card-inner {f_class}">
                 <div class="flip-card-front">{n} x {i} = ?</div>
                 <div class="flip-card-back">{n * i}</div>
@@ -87,6 +93,7 @@ else:
             </div>
         ''', unsafe_allow_html=True)
 
+        # Κουμπιά Ελέγχου
         if not st.session_state.show_answer and not st.session_state.is_exiting:
             if st.button("ΔΕΣ ΤΗΝ ΑΠΑΝΤΗΣΗ 💡"):
                 st.session_state.show_answer = True
@@ -101,12 +108,15 @@ else:
                 st.session_state.is_exiting = True
                 st.rerun()
 
+        # Διαδικασία Μετάβασης (Slide Out -> Zoom In)
         if st.session_state.is_exiting:
-            time.sleep(0.7)
+            time.sleep(0.8) # Χρόνος για να προλάβει να φύγει η κάρτα
             st.session_state.current_q = None
             st.session_state.show_answer = False
+            st.session_state.is_exiting = False
+            st.session_state.q_counter += 1 # Αυξάνουμε τον μετρητή για να "γεννηθεί" νέα κάρτα
             st.rerun()
 
-        if st.button("⬅️ Αλλαγή"):
+        if st.button("⬅️ Αλλαγή Αριθμών"):
             st.session_state.game_started = False
             st.rerun()
