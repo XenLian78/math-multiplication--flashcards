@@ -20,11 +20,6 @@ css_code = """
     100% { transform: translateX(0) rotate(0deg); opacity: 1; }
 }
 
-@keyframes slideOutRight {
-    0% { transform: translateX(0) rotate(0deg); opacity: 1; }
-    100% { transform: translateX(150%) rotate(10deg); opacity: 0; }
-}
-
 @keyframes boxFade {
     0% { opacity: 0.5; }
     100% { opacity: 1; }
@@ -42,7 +37,6 @@ css_code = """
 .slow-text-fade { animation: textFadeIn 1s ease-out forwards; }
 .box-anim { animation: boxFade 1.5s ease-in-out; }
 .first-card-anim { animation: slideInLeft 2.5s ease-out forwards; }
-.exit-card-anim { animation: slideOutRight 2.0s ease-in forwards; }
 
 .card-content {
     width: 100%;
@@ -60,20 +54,22 @@ css_code = """
 .front-style { background-color: white; color: #495057; border-color: #a2d2ff; }
 .back-style { background-color: #f0f9ff; color: #0077b6; border-color: #00b4d8; }
 
-/* Το Τελικό Γαλάζιο Τετράγωνο Πλαίσιο */
+/* Το Τελικό Γαλάζιο Τετράγωνο Πλαίσιο - Μεγαλύτερο & Πιο Ψηλά */
 .final-success-box {
     background-color: #f0f9ff;
     color: #0077b6;
-    border: 6px solid #00b4d8;
-    border-radius: 25px;
-    padding: 60px 20px;
+    border: 8px solid #00b4d8;
+    border-radius: 30px;
+    padding: 80px 40px; /* Περισσότερο χώρο εσωτερικά */
     text-align: center;
-    font-size: 45px; /* Μεγάλη γραμματοσειρά */
+    font-size: 60px; /* Πολύ μεγάλη γραμματοσειρά */
     font-weight: bold;
-    box-shadow: 0px 12px 24px rgba(0,0,0,0.15);
-    margin: 40px 0;
-    line-height: 1.4;
-    animation: textFadeIn 2s ease-out;
+    box-shadow: 0px 15px 30px rgba(0,0,0,0.2);
+    margin-top: -30px; /* Ανέβασμα πιο ψηλά */
+    margin-bottom: 40px;
+    line-height: 1.2;
+    animation: textFadeIn 1.5s ease-out;
+    width: 100%;
 }
 
 .score-box {
@@ -134,16 +130,12 @@ else:
     all_q = [(n, i) for n in st.session_state.selected_numbers for i in range(1, 11)]
     rem_q = [q for q in all_q if q not in st.session_state.correct_answers]
 
-    # Αν τελειώσαμε, δείξε πρώτα την κάρτα να φεύγει
     if not rem_q and not st.session_state.is_finished:
         st.session_state.is_finished = True
         st.rerun()
 
     if st.session_state.is_finished:
-        # Εφέ εξόδου της τελευταίας κάρτας
-        st.markdown('<div class="main-card exit-card-anim"><div class="card-content back-style">🌟</div></div>', unsafe_allow_html=True)
-        
-        # Μπαλόνια και Μεγάλο Γαλάζιο Πλαίσιο
+        # Μπαλόνια και Μεγάλο Γαλάζιο Τετράγωνο Πλαίσιο (Ανέβηκε πιο ψηλά)
         st.balloons()
         st.markdown('<div class="final-success-box">🎈👏🏻 Συγχαρητήρια!<br>Τα έμαθες όλα!</div>', unsafe_allow_html=True)
         
@@ -163,44 +155,4 @@ else:
 
         n, i = st.session_state.current_q
         
-        if len(st.session_state.correct_answers) == 0 and not st.session_state.show_answer:
-            box_class = "first-card-anim"
-        else:
-            box_class = "box-anim"
-            
-        if not st.session_state.show_answer:
-            card_content = f"{n} x {i} = ?"
-            card_style = "front-style"
-            text_class = ""
-        else:
-            card_content = f"{n * i}"
-            card_style = "back-style"
-            text_class = "slow-text-fade"
-
-        card_html = f'''
-        <div class="main-card {box_class}" id="c_{st.session_state.card_id}_{st.session_state.show_answer}">
-            <div class="card-content {card_style}">
-                <span class="{text_class}">{card_content}</span>
-            </div>
-        </div>
-        '''
-        st.markdown(card_html, unsafe_allow_html=True)
-
-        if not st.session_state.show_answer:
-            if st.button("ΔΕΣ ΤΗΝ ΑΠΑΝΤΗΣΗ 💡", use_container_width=True, type="primary"):
-                st.session_state.show_answer = True
-                st.rerun()
-        else:
-            c1, c2 = st.columns(2)
-            if c1.button("Το βρήκες! ✅", use_container_width=True):
-                st.session_state.correct_answers.add(st.session_state.current_q)
-                st.session_state.current_q = None
-                st.rerun()
-            if c2.button("Ξαναπροσπάθησε 😉", use_container_width=True):
-                st.session_state.current_q = None
-                st.rerun()
-
-        st.write("")
-        if st.button("⬅️ Αλλαγή Αριθμών", use_container_width=True):
-            st.session_state.game_started = False
-            st.rerun()
+        if len(
