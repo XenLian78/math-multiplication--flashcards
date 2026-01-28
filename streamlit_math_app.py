@@ -11,14 +11,14 @@ css_code += ".stApp { background-color: #f0f7ff; }"
 # FADE IN
 css_code += "@keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }"
 
-# Animations για αρχή και τέλος (1s)
+# Animations για αρχή και τέλος (2.5s για πιο αργή κίνηση)
 css_code += "@keyframes slideInLeft { 0% { transform: translateX(-150%) rotate(-10deg); opacity: 0; } 100% { transform: translateX(0) rotate(0deg); opacity: 1; } }"
 css_code += "@keyframes slideOutRight { 0% { transform: translateX(0); opacity: 1; } 100% { transform: translateX(150%) rotate(10deg); opacity: 0; } }"
 
 # CARD STYLE
 css_code += ".main-card { background-color: transparent; width: 100%; height: 250px; perspective: 1000px; margin: 20px 0; }"
 
-# FADE IN TIME LAP
+# FADE IN TIME LAP (Αυξήθηκε κατά 0.5s για πιο αργή μετάβαση)
 css_code += ".fade-anim { animation: fadeIn 2.5s ease-out forwards; }"
 css_code += ".first-card-anim { animation: slideInLeft 2.5s ease-out forwards; }"
 css_code += ".last-card-anim { animation: slideOutRight 2.5s ease-in forwards; }"
@@ -64,7 +64,7 @@ if not st.session_state.game_started:
             st.session_state.card_id = 0
             st.rerun()
     else:
-        st.info("💡 Επίλεξε αριθμούς για να ξεκινήσεις!")
+        st.info("✅ Επίλεξε αριθμούς για να ξεκινήσεις!")
 
 # --- GAME PAGE ---
 else:
@@ -78,7 +78,7 @@ else:
     if st.session_state.is_finished:
         st.markdown('<div class="main-card last-card-anim"></div>', unsafe_allow_html=True)
         st.balloons()
-        st.success("🎉 Συγχαρητήρια! Τα έμαθες όλα!")
+        st.success("🎈👏🏻 Συγχαρητήρια! Τα έμαθες όλα!")
         if st.button("🔄 Παίξε ξανά", use_container_width=True):
             st.session_state.game_started = False
             st.rerun()
@@ -125,9 +125,4 @@ else:
                 st.rerun()
             if c2.button("Ξαναπροσπάθησε 😉", use_container_width=True):
                 st.session_state.current_q = None
-                st.rerun()
-
-        st.write("")
-        if st.button("⬅️ Αλλαγή Αριθμών", use_container_width=True):
-            st.session_state.game_started = False
-            st.rerun()
+                st.
