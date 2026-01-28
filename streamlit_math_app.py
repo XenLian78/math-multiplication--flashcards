@@ -11,7 +11,7 @@ css_code = """
 
 @keyframes slideInLeft {
     0% { transform: translateX(-150%) rotate(-10deg); opacity: 0; }
-    100% { transform: translateX(10) rotate(0deg); opacity: 1; }
+    100% { transform: translateX(0) rotate(0deg); opacity: 1; }
 }
 
 @keyframes slideOutRight {
@@ -21,8 +21,8 @@ css_code = """
 
 .flip-card { background-color: transparent; width: 100%; height: 250px; perspective: 1000px; margin: 20px 0; }
 
-.first-card-anim { animation: slideInLeft 0.8s ease-out forwards; }
-.last-card-anim { animation: slideOutRight 0.8s ease-in forwards; }
+.first-card-anim { animation: slideInLeft 0.1s ease-out forwards; }
+.last-card-anim { animation: slideOutRight 0.20s ease-in forwards; }
 
 .flip-card-inner { 
     position: relative; width: 100%; height: 100%; text-align: center; 
