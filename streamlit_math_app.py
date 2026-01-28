@@ -8,20 +8,20 @@ st.set_page_config(page_title="Μαθαίνω την Προπαίδεια", page
 css_code = "<style>"
 css_code += ".stApp { background-color: #f0f7ff; }"
 
-# Animation Fade In: Πλέον ΜΟΝΟ opacity, χωρίς κίνηση (translate) για απόλυτη σταθερότητα
+# Animation Fade In
 css_code += "@keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }"
 
-# Animations για αρχή και τέλος (λίγο πιο αργά - 1.0s)
+# Animations για αρχή και τέλος (Ρυθμισμένα στα 2.5s)
 css_code += "@keyframes slideInLeft { 0% { transform: translateX(-150%) rotate(-10deg); opacity: 0; } 100% { transform: translateX(0) rotate(0deg); opacity: 1; } }"
 css_code += "@keyframes slideOutRight { 0% { transform: translateX(0); opacity: 1; } 100% { transform: translateX(150%) rotate(10deg); opacity: 0; } }"
 
 # Βασικό στυλ κάρτας
 css_code += ".main-card { background-color: transparent; width: 100%; height: 250px; perspective: 1000px; margin: 20px 0; }"
 
-# Εφαρμογή Fade In: Αυξήσαμε τη διάρκεια σε 0.9s για πιο αργή μετάβαση
-css_code += ".fade-anim { animation: fadeIn 0.9s ease-out forwards; }"
-css_code += ".first-card-anim { animation: slideInLeft 1.0s ease-out forwards; }"
-css_code += ".last-card-anim { animation: slideOutRight 1.0s ease-in forwards; }"
+# Εφαρμογή Durations: 2.5s για όλα τα animations
+css_code += ".fade-anim { animation: fadeIn 2.5s ease-out forwards; }"
+css_code += ".first-card-anim { animation: slideInLeft 2.5s ease-out forwards; }"
+css_code += ".last-card-anim { animation: slideOutRight 2.5s ease-in forwards; }"
 
 # Δομή κάρτας
 css_code += ".card-content { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; border-radius: 25px; font-size: 55px; font-weight: bold; box-shadow: 0px 8px 16px rgba(0,0,0,0.1); border: 4px solid; transition: background-color 0.5s ease; }"
@@ -106,7 +106,7 @@ else:
             card_content = str(n * i)
             card_style = "back-style"
 
-        # HTML με Double-ID για μηδενικό glitch
+        # HTML με Double-ID για αποφυγή glitching κατά την αλλαγή
         card_html = '<div class="main-card ' + anim_class + '" id="card_' + str(st.session_state.card_id) + '_' + str(st.session_state.show_answer) + '">'
         card_html += '<div class="card-content ' + card_style + '">' + card_content + '</div>'
         card_html += '</div>'
