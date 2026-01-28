@@ -4,21 +4,21 @@ import random
 # 1. Ρύθμιση σελίδας
 st.set_page_config(page_title="Μαθαίνω την Προπαίδεια", page_icon="🧮")
 
-# 2. CSS για Animations (Σταθερό Fade και Slide)
+# 2. CSS για Animations
 css_code = "<style>"
 css_code += ".stApp { background-color: #f0f7ff; }"
 
-# Animation Fade In
+# Animation Fade In - Ρυθμισμένο για απόλυτη ηρεμία
 css_code += "@keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }"
 
-# Animations για αρχή και τέλος (Ρυθμισμένα στα 2.5s)
+# Animations Εισόδου/Εξόδου
 css_code += "@keyframes slideInLeft { 0% { transform: translateX(-150%) rotate(-10deg); opacity: 0; } 100% { transform: translateX(0) rotate(0deg); opacity: 1; } }"
 css_code += "@keyframes slideOutRight { 0% { transform: translateX(0); opacity: 1; } 100% { transform: translateX(150%) rotate(10deg); opacity: 0; } }"
 
 # Βασικό στυλ κάρτας
 css_code += ".main-card { background-color: transparent; width: 100%; height: 250px; perspective: 1000px; margin: 20px 0; }"
 
-# Εφαρμογή Durations: 2.5s για όλα τα animations
+# Εφαρμογή Durations: 2.5s παντού για ομοιομορφία
 css_code += ".fade-anim { animation: fadeIn 2.5s ease-out forwards; }"
 css_code += ".first-card-anim { animation: slideInLeft 2.5s ease-out forwards; }"
 css_code += ".last-card-anim { animation: slideOutRight 2.5s ease-in forwards; }"
@@ -26,7 +26,7 @@ css_code += ".last-card-anim { animation: slideOutRight 2.5s ease-in forwards; }
 # Δομή κάρτας
 css_code += ".card-content { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; border-radius: 25px; font-size: 55px; font-weight: bold; box-shadow: 0px 8px 16px rgba(0,0,0,0.1); border: 4px solid; transition: background-color 0.5s ease; }"
 
-# Χρώματα για Ερώτηση και Απάντηση
+# Χρώματα
 css_code += ".front-style { background-color: white; color: #495057; border-color: #a2d2ff; }"
 css_code += ".back-style { background-color: #f0f9ff; color: #0077b6; border-color: #00b4d8; }"
 
@@ -95,10 +95,13 @@ else:
 
         n, i = st.session_state.current_q
         
-        # Επιλογή Animation (SlideIn για την 1η, FadeIn για όλες τις άλλες)
-        anim_class = "first-card-anim" if len(st.session_state.correct_answers) == 0 else "fade-anim"
+        # ΕΦΑΡΜΟΓΗ ΟΜΟΙΟΜΟΡΦΟΥ ANIMATION
+        # Η πρώτη κάρτα του παιχνιδιού κάνει slide, όλες οι επόμενες και οι αλλαγές πλευράς κάνουν το ίδιο αργό fade
+        if len(st.session_state.correct_answers) == 0 and not st.session_state.show_answer:
+            anim_class = "first-card-anim"
+        else:
+            anim_class = "fade-anim"
             
-        # Επιλογή Στυλ και Περιεχομένου
         if not st.session_state.show_answer:
             card_content = str(n) + " x " + str(i) + " = ?"
             card_style = "front-style"
@@ -106,8 +109,9 @@ else:
             card_content = str(n * i)
             card_style = "back-style"
 
-        # HTML με Double-ID για αποφυγή glitching κατά την αλλαγή
-        card_html = '<div class="main-card ' + anim_class + '" id="card_' + str(st.session_state.card_id) + '_' + str(st.session_state.show_answer) + '">'
+        # Το μυστικό είναι το id: αλλάζοντας το id, το Streamlit θεωρεί την κάρτα "νέα" 
+        # και πυροδοτεί το animation από την αρχή
+        card_html = '<div class="main-card ' + anim_class + '" id="c_' + str(st.session_state.card_id) + '_' + str(st.session_state.show_answer) + '">'
         card_html += '<div class="card-content ' + card_style + '">' + card_content + '</div>'
         card_html += '</div>'
         
