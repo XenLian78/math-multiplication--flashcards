@@ -9,16 +9,22 @@ css_code = """
 <style>
 .stApp { background-color: #f0f7ff; }
 
-/* Το Fade In animation που ζήτησες να είναι αργό και σταθερό */
-@keyframes slowFade {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
+/* Animation για το κείμενο (τον αριθμό) - Πολύ αργό Fade In */
+@keyframes textFadeIn {
+    0% { opacity: 0; filter: blur(5px); }
+    100% { opacity: 1; filter: blur(0px); }
 }
 
-/* Animation για την πρώτη είσοδο */
+/* Animation για την πρώτη είσοδο της κάρτας */
 @keyframes slideInLeft {
     0% { transform: translateX(-150%) rotate(-10deg); opacity: 0; }
     100% { transform: translateX(0) rotate(0deg); opacity: 1; }
+}
+
+/* Animation για το πλαίσιο της κάρτας */
+@keyframes boxFade {
+    0% { opacity: 0.5; }
+    100% { opacity: 1; }
 }
 
 .main-card {
@@ -29,9 +35,13 @@ css_code = """
     margin: 20px 0;
 }
 
-/* Εφαρμογή του αργού Fade (4 δευτερόλεπτα) */
-.fade-anim {
-    animation: slowFade 4.0s ease-in-out forwards;
+/* Εφαρμογή του Animation στο κείμενο (5 δευτερόλεπτα για να είναι πολύ αργό) */
+.slow-text-fade {
+    animation: textFadeIn 5.0s ease-out forwards;
+}
+
+.box-anim {
+    animation: boxFade 1.5s ease-in-out;
 }
 
 .first-card-anim {
@@ -45,7 +55,7 @@ css_code = """
     align-items: center;
     justify-content: center;
     border-radius: 25px;
-    font-size: 55px;
+    font-size: 65px; /* Μεγαλύτερη γραμματοσειρά για την απάντηση */
     font-weight: bold;
     box-shadow: 0px 8px 16px rgba(0,0,0,0.1);
     border: 4px solid;
@@ -123,7 +133,6 @@ else:
             st.session_state.game_started = False
             st.rerun()
     else:
-        # PROGRESS
         progress_val = len(st.session_state.correct_answers) / len(all_q)
         st.progress(progress_val)
         st.markdown(f'<div class="score-box">🟦 Σωστά: {len(st.session_state.correct_answers)} / {len(all_q)}</div>', unsafe_allow_html=True)
@@ -135,22 +144,27 @@ else:
 
         n, i = st.session_state.current_q
         
-        # Εφαρμογή του Fade σε κάθε αλλαγή (το βίντεο έδειξε ότι αυτό λείπει)
-        # Για να δουλέψει το animation σε κάθε κλικ, αλλάζουμε το ID του div
-        anim_class = "first-card-anim" if len(st.session_state.correct_answers) == 0 and not st.session_state.show_answer else "fade-anim"
+        # Επιλογή κλάσης για το κουτί
+        if len(st.session_state.correct_answers) == 0 and not st.session_state.show_answer:
+            box_class = "first-card-anim"
+        else:
+            box_class = "box-anim"
             
         if not st.session_state.show_answer:
             card_content = f"{n} x {i} = ?"
             card_style = "front-style"
+            text_class = "" # Χωρίς fade στην ερώτηση για να είναι άμεσα ορατή
         else:
             card_content = f"{n * i}"
             card_style = "back-style"
+            text_class = "slow-text-fade" # ΕΔΩ εφαρμόζεται το αργό fade στην απάντηση
 
-        # Εδώ είναι το "μαγικό": Το c_{st.session_state.card_id}_{st.session_state.show_answer} 
-        # αναγκάζει τον browser να ξανατρέξει το animation επειδή αλλάζει το ID
+        # Κατασκευή HTML: Το animation slow-text-fade μπαίνει μέσα στο περιεχόμενο
         card_html = f'''
-        <div class="main-card {anim_class}" id="card_step_{st.session_state.card_id}_{st.session_state.show_answer}">
-            <div class="card-content {card_style}">{card_content}</div>
+        <div class="main-card {box_class}" id="c_{st.session_state.card_id}_{st.session_state.show_answer}">
+            <div class="card-content {card_style}">
+                <span class="{text_class}">{card_content}</span>
+            </div>
         </div>
         '''
         st.markdown(card_html, unsafe_allow_html=True)
