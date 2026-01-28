@@ -27,14 +27,14 @@ css_code = """
 .main-card {
     background-color: transparent;
     width: 100%;
-    max-width: 500px; /* Μέγιστο πλάτος για να μην απλώνει υπερβολικά */
+    max-width: 500px;
     margin: 20px auto;
     perspective: 1000px;
 }
 
 .card-content {
     width: 100%;
-    aspect-ratio: 16 / 9; /* Διατηρεί σταθερή αναλογία */
+    aspect-ratio: 16 / 9;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -42,7 +42,6 @@ css_code = """
     font-weight: bold;
     box-shadow: 0px 8px 16px rgba(0,0,0,0.1);
     border: 4px solid;
-    /* Δυναμική γραμματοσειρά ανάλογα με το πλάτος της οθόνης */
     font-size: clamp(40px, 10vw, 70px); 
 }
 
@@ -62,7 +61,7 @@ css_code = """
     width: 100%;
     max-width: 500px;
     margin: 10px auto;
-    aspect-ratio: 1 / 1; /* ΤΕΛΕΙΟ ΤΕΤΡΑΓΩΝΟ */
+    aspect-ratio: 1 / 1;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -85,99 +84,6 @@ css_code = """
     margin-bottom: 10px;
 }
 
-/* Διόρθωση για τα κουμπιά */
-.stButton>button { width: 100%; border-radius: 15px; font-weight: bold; height: 3.5em; font-size: 18px !important; }
-</style>
-"""
-
-st.markdown(css_code, unsafe_allow_html=True)
-
-# 3. Session State Initialization
-if 'game_started' not in st.session_state: st.session_state.game_started = False
-if 'correct_answers' not in st.session_state: st.session_state.correct_answers = set()
-if 'current_q' not in st.session_state: st.session_state.current_q = None
-if 'show_answer' not in st.session_state: st.session_state.show_answer = False
-if 'selected_numbers' not in st.session_state: st.session_state.selected_numbers = []
-if 'is_finished' not in st.session_state: st.session_state.is_finished = False
-if 'card_id' not in st.session_state: st.session_state.card_id = 0
-
-st.title("🧮 Προπαίδεια")
-
-# --- HOME PAGE ---
-if not st.session_state.game_started:
-    st.subheader("Ποιους αριθμούς θα μάθουμε;")
-    cols = st.columns(5)
-    selected = [i for i in range(1, 11) if cols[(i-1)%5].checkbox(str(i), key=f"sel_{i}")]
-    st.session_state.selected_numbers = selected
-    
-    if selected:
-        if st.button("🚀 ΞΕΚΙΝΑΜΕ!", type="primary", use_container_width=True):
-            st.session_state.game_started = True
-            st.session_state.correct_answers = set()
-            st.session_state.current_q = None
-            st.session_state.is_finished = False
-            st.session_state.card_id = 0
-            st.rerun()
-    else:
-        st.info("✅ Επίλεξε αριθμούς!")
-
-# --- GAME PAGE ---
-else:
-    all_q = [(n, i) for n in st.session_state.selected_numbers for i in range(1, 11)]
-    rem_q = [q for q in all_q if q not in st.session_state.correct_answers]
-
-    if not rem_q and not st.session_state.is_finished:
-        st.session_state.is_finished = True
-        st.rerun()
-
-    if st.session_state.is_finished:
-        st.balloons()
-        st.markdown('<div class="final-success-box">🎈👏🏻<br>Συγχαρητήρια!<br>Τα έμαθες όλα!</div>', unsafe_allow_html=True)
-        if st.button("🔄 Παίξε ξανά", use_container_width=True):
-            st.session_state.game_started = False
-            st.session_state.is_finished = False
-            st.rerun()
-    else:
-        # Score & Progress
-        score = len(st.session_state.correct_answers)
-        total = len(all_q)
-        st.progress(score / total)
-        st.markdown(f'<div class="score-box">🟦 Σωστά: {score} / {total}</div>', unsafe_allow_html=True)
-        
-        if st.session_state.current_q is None:
-            st.session_state.current_q = random.choice(rem_q)
-            st.session_state.show_answer = False
-            st.session_state.card_id += 1
-
-        n, i = st.session_state.current_q
-        box_class = "first-card-anim" if score == 0 and not st.session_state.show_answer else "box-anim"
-        
-        card_content = f"{n * i}" if st.session_state.show_answer else f"{n} x {i} = ?"
-        card_style = "back-style" if st.session_state.show_answer else "front-style"
-        text_class = "slow-text-fade" if st.session_state.show_answer else ""
-
-        st.markdown(f'''
-            <div class="main-card {box_class}">
-                <div class="card-content {card_style}">
-                    <span class="{text_class}">{card_content}</span>
-                </div>
-            </div>
-        ''', unsafe_allow_html=True)
-
-        if not st.session_state.show_answer:
-            if st.button("ΔΕΣ ΤΗΝ ΑΠΑΝΤΗΣΗ 💡", type="primary", use_container_width=True):
-                st.session_state.show_answer = True
-                st.rerun()
-        else:
-            c1, c2 = st.columns(2)
-            if c1.button("Το βρήκες! ✅", use_container_width=True):
-                st.session_state.correct_answers.add(st.session_state.current_q)
-                st.session_state.current_q = None
-                st.rerun()
-            if c2.button("Ξαναπροσπάθησε 😉", use_container_width=True):
-                st.session_state.current_q = None
-                st.rerun()
-
-        if st.button("⬅️ Αλλαγή Αριθμών", use_container_width=True):
-            st.session_state.game_started = False
-            st.rerun()
+/* Διόρθωση Χρώματος Κουμπιών (ΜΠΛΕ) */
+div.stButton > button:first-child {
+    border
