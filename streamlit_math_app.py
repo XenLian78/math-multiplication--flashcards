@@ -47,43 +47,4 @@ css_code = """
 
 .slow-text-fade { animation: textFadeIn 1s ease-out forwards; }
 .box-anim { animation: boxFade 1.5s ease-in-out; }
-.first-card-anim { animation: slideInLeft 2s ease-out forwards; }
-
-.front-style { background-color: white; color: #495057; border-color: #a2d2ff; }
-.back-style { background-color: #f0f9ff; color: #0077b6; border-color: #00b4d8; }
-
-/* Τελικό Πλαίσιο - Responsive & Τετράγωνο */
-.final-success-box {
-    background-color: #f0f9ff;
-    color: #0077b6;
-    border: 8px solid #00b4d8;
-    border-radius: 30px;
-    width: 100%;
-    max-width: 500px;
-    margin: 10px auto;
-    aspect-ratio: 1 / 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    font-size: clamp(30px, 8vw, 55px);
-    font-weight: bold;
-    box-shadow: 0px 15px 30px rgba(0,0,0,0.2);
-    animation: textFadeIn 1.5s ease-out;
-}
-
-.score-box {
-    background-color: white;
-    padding: 10px;
-    border-radius: 12px;
-    text-align: center;
-    font-size: 16px;
-    border: 2px solid #bde0fe;
-    color: #0077b6;
-    margin-bottom: 10px;
-}
-
-/* Διόρθωση Χρώματος Κουμπιών (ΜΠΛΕ) */
-div.stButton > button:first-child {
-    border
+.first-card-anim { animation: slide
