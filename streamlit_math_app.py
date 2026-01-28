@@ -11,7 +11,7 @@ css_code += ".stApp { background-color: #f0f7ff; }"
 # FADE IN
 css_code += "@keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }"
 
-# Animations για αρχή και τέλος (λίγο πιο αργά - 1.0s)
+# Animations για αρχή και τέλος (λίγο πιο αργά - 1.5s)
 css_code += "@keyframes slideInLeft { 0% { transform: translateX(-150%) rotate(-10deg); opacity: 0; } 100% { transform: translateX(0) rotate(0deg); opacity: 1; } }"
 css_code += "@keyframes slideOutRight { 0% { transform: translateX(0); opacity: 1; } 100% { transform: translateX(150%) rotate(10deg); opacity: 0; } }"
 
@@ -19,9 +19,9 @@ css_code += "@keyframes slideOutRight { 0% { transform: translateX(0); opacity: 
 css_code += ".main-card { background-color: transparent; width: 100%; height: 250px; perspective: 1000px; margin: 20px 0; }"
 
 # FADE IN TIME LAP
-css_code += ".fade-anim { animation: fadeIn 1s ease-out forwards; }"
-css_code += ".first-card-anim { animation: slideInLeft 1.0s ease-out forwards; }"
-css_code += ".last-card-anim { animation: slideOutRight 1.0s ease-in forwards; }"
+css_code += ".fade-anim { animation: fadeIn 1.5s ease-out forwards; }"
+css_code += ".first-card-anim { animation: slideInLeft 1.5s ease-out forwards; }"
+css_code += ".last-card-anim { animation: slideOutRight 1.5s ease-in forwards; }"
 
 # CARD
 css_code += ".card-content { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; border-radius: 25px; font-size: 55px; font-weight: bold; box-shadow: 0px 8px 16px rgba(0,0,0,0.1); border: 4px solid; transition: background-color 0.5s ease; }"
