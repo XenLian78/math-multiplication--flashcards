@@ -4,29 +4,29 @@ import random
 # 1. Ρύθμιση σελίδας
 st.set_page_config(page_title="Μαθαίνω την Προπαίδεια", page_icon="🧮")
 
-# 2. CSS για Animations (Σταθερό Fade και Slide)
+# 2. AMINATION CSS 
 css_code = "<style>"
 css_code += ".stApp { background-color: #f0f7ff; }"
 
-# Animation Fade In: Πλέον ΜΟΝΟ opacity, χωρίς κίνηση (translate) για απόλυτη σταθερότητα
+# FADE IN
 css_code += "@keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }"
 
 # Animations για αρχή και τέλος (λίγο πιο αργά - 1.0s)
 css_code += "@keyframes slideInLeft { 0% { transform: translateX(-150%) rotate(-10deg); opacity: 0; } 100% { transform: translateX(0) rotate(0deg); opacity: 1; } }"
 css_code += "@keyframes slideOutRight { 0% { transform: translateX(0); opacity: 1; } 100% { transform: translateX(150%) rotate(10deg); opacity: 0; } }"
 
-# Βασικό στυλ κάρτας
+# CARD STYLE
 css_code += ".main-card { background-color: transparent; width: 100%; height: 250px; perspective: 1000px; margin: 20px 0; }"
 
-# Εφαρμογή Fade In: Αυξήσαμε τη διάρκεια σε 0.9s για πιο αργή μετάβαση
-css_code += ".fade-anim { animation: fadeIn 0.9s ease-out forwards; }"
+# FADE IN TIME LAP
+css_code += ".fade-anim { animation: fadeIn 1s ease-out forwards; }"
 css_code += ".first-card-anim { animation: slideInLeft 1.0s ease-out forwards; }"
 css_code += ".last-card-anim { animation: slideOutRight 1.0s ease-in forwards; }"
 
-# Δομή κάρτας
+# CARD
 css_code += ".card-content { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; border-radius: 25px; font-size: 55px; font-weight: bold; box-shadow: 0px 8px 16px rgba(0,0,0,0.1); border: 4px solid; transition: background-color 0.5s ease; }"
 
-# Χρώματα για Ερώτηση και Απάντηση
+# CARD COLORS
 css_code += ".front-style { background-color: white; color: #495057; border-color: #a2d2ff; }"
 css_code += ".back-style { background-color: #f0f9ff; color: #0077b6; border-color: #00b4d8; }"
 
@@ -48,7 +48,7 @@ if 'card_id' not in st.session_state: st.session_state.card_id = 0
 
 st.title("🧮 Το παιχνίδι της Προπαίδειας")
 
-# --- ΟΘΟΝΗ ΕΠΙΛΟΓΗΣ ---
+# --- HOME PAGE ---
 if not st.session_state.game_started:
     st.subheader("Ποιους αριθμούς θα μάθουμε σήμερα;")
     cols = st.columns(5)
@@ -66,7 +66,7 @@ if not st.session_state.game_started:
     else:
         st.info("💡 Επίλεξε αριθμούς για να ξεκινήσεις!")
 
-# --- ΟΘΟΝΗ ΠΑΙΧΝΙΔΙΟΥ ---
+# --- GAME PAGE ---
 else:
     all_q = [(n, i) for n in st.session_state.selected_numbers for i in range(1, 11)]
     rem_q = [q for q in all_q if q not in st.session_state.correct_answers]
@@ -83,7 +83,7 @@ else:
             st.session_state.game_started = False
             st.rerun()
     else:
-        # Μπάρα Εξέλιξης
+        # PROGRESS BAR
         progress_val = len(st.session_state.correct_answers) / len(all_q)
         st.progress(progress_val)
         st.markdown(f'<div class="score-box">🟦 Σωστά: {len(st.session_state.correct_answers)} / {len(all_q)}</div>', unsafe_allow_html=True)
@@ -95,7 +95,7 @@ else:
 
         n, i = st.session_state.current_q
         
-        # Επιλογή Animation (SlideIn για την 1η, FadeIn για όλες τις άλλες)
+        # ANIMATION (SlideIn για την 1η, FadeIn για όλες τις άλλες)
         anim_class = "first-card-anim" if len(st.session_state.correct_answers) == 0 else "fade-anim"
             
         # Επιλογή Στυλ και Περιεχομένου
