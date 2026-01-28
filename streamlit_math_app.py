@@ -21,12 +21,12 @@ css_code = """
 
 .flip-card { background-color: transparent; width: 100%; height: 250px; perspective: 1000px; margin: 20px 0; }
 
-.first-card-anim { animation: slideInLeft 0.1s ease-out forwards; }
-.last-card-anim { animation: slideOutRight 0.20s ease-in forwards; }
+.first-card-anim { animation: slideInLeft 0.8s ease-out forwards; }
+.last-card-anim { animation: slideOutRight 0.8s ease-in forwards; }
 
 .flip-card-inner { 
     position: relative; width: 100%; height: 100%; text-align: center; 
-    transition: transform 0.6s; transform-style: preserve-3d; 
+    transition: transform 0.1s; transform-style: preserve-3d; 
 }
 
 .do-flip { transform: rotateY(180deg); }
