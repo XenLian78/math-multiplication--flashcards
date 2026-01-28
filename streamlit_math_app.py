@@ -149,7 +149,7 @@ else:
 
     if st.session_state.is_finished:
         st.balloons()
-        st.markdown('<div class="final-success-box">🎈👏🏻 Συγχαρητήρια!<br>Τα κατάφερες!</div>', unsafe_allow_html=True)
+        st.markdown('<div class="final-success-box"> Συγχαρητήρια!<br>Τα κατάφερες! <br> 🎈👏🏻 </div>', unsafe_allow_html=True)
         
         if st.button("🔄 Παίξε ξανά", use_container_width=True):
             st.session_state.game_started = False
