@@ -8,20 +8,20 @@ st.set_page_config(page_title="Μαθαίνω την Προπαίδεια", page
 css_code = "<style>"
 css_code += ".stApp { background-color: #f0f7ff; }"
 
-# Animation Fade In - Ρυθμισμένο για απόλυτη ηρεμία
+# Animation Fade In - Πολύ αργό (3.5s)
 css_code += "@keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }"
 
-# Animations Εισόδου/Εξόδου
+# Animations Εισόδου/Εξόδου (Εναρμονισμένα στα 3.5s)
 css_code += "@keyframes slideInLeft { 0% { transform: translateX(-150%) rotate(-10deg); opacity: 0; } 100% { transform: translateX(0) rotate(0deg); opacity: 1; } }"
 css_code += "@keyframes slideOutRight { 0% { transform: translateX(0); opacity: 1; } 100% { transform: translateX(150%) rotate(10deg); opacity: 0; } }"
 
 # Βασικό στυλ κάρτας
 css_code += ".main-card { background-color: transparent; width: 100%; height: 250px; perspective: 1000px; margin: 20px 0; }"
 
-# Εφαρμογή Durations: 2.5s παντού για ομοιομορφία
-css_code += ".fade-anim { animation: fadeIn 2.5s ease-out forwards; }"
-css_code += ".first-card-anim { animation: slideInLeft 2.5s ease-out forwards; }"
-css_code += ".last-card-anim { animation: slideOutRight 2.5s ease-in forwards; }"
+# Εφαρμογή Durations: 3.5s για απόλυτα ομαλή μετάβαση
+css_code += ".fade-anim { animation: fadeIn 3.5s ease-out forwards; }"
+css_code += ".first-card-anim { animation: slideInLeft 3.5s ease-out forwards; }"
+css_code += ".last-card-anim { animation: slideOutRight 3.5s ease-in forwards; }"
 
 # Δομή κάρτας
 css_code += ".card-content { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; border-radius: 25px; font-size: 55px; font-weight: bold; box-shadow: 0px 8px 16px rgba(0,0,0,0.1); border: 4px solid; transition: background-color 0.5s ease; }"
@@ -48,7 +48,7 @@ if 'card_id' not in st.session_state: st.session_state.card_id = 0
 
 st.title("🧮 Το παιχνίδι της Προπαίδειας")
 
-# --- ΟΘΟΝΗ ΕΠΙΛΟΓΗΣ ---
+# --- HOME PAGE ---
 if not st.session_state.game_started:
     st.subheader("Ποιους αριθμούς θα μάθουμε σήμερα;")
     cols = st.columns(5)
@@ -66,7 +66,7 @@ if not st.session_state.game_started:
     else:
         st.info("✅ Επίλεξε αριθμούς για να ξεκινήσεις!")
 
-# --- ΟΘΟΝΗ ΠΑΙΧΝΙΔΙΟΥ ---
+# --- GAME PAGE ---
 else:
     all_q = [(n, i) for n in st.session_state.selected_numbers for i in range(1, 11)]
     rem_q = [q for q in all_q if q not in st.session_state.correct_answers]
@@ -83,7 +83,7 @@ else:
             st.session_state.game_started = False
             st.rerun()
     else:
-        # Μπάρα Εξέλιξης
+        # PROGRESS BAR
         progress_val = len(st.session_state.correct_answers) / len(all_q)
         st.progress(progress_val)
         st.markdown(f'<div class="score-box">🟦 Σωστά: {len(st.session_state.correct_answers)} / {len(all_q)}</div>', unsafe_allow_html=True)
@@ -95,24 +95,21 @@ else:
 
         n, i = st.session_state.current_q
         
-        # ΕΦΑΡΜΟΓΗ ΟΜΟΙΟΜΟΡΦΟΥ ANIMATION
-        # Η πρώτη κάρτα του παιχνιδιού κάνει slide, όλες οι επόμενες και οι αλλαγές πλευράς κάνουν το ίδιο αργό fade
+        # Εφαρμογή Fade-in σε κάθε αλλαγή (εκτός από την πρώτη-πρώτη είσοδο)
         if len(st.session_state.correct_answers) == 0 and not st.session_state.show_answer:
             anim_class = "first-card-anim"
         else:
             anim_class = "fade-anim"
             
         if not st.session_state.show_answer:
-            card_content = str(n) + " x " + str(i) + " = ?"
+            card_content = f"{n} x {i} = ?"
             card_style = "front-style"
         else:
-            card_content = str(n * i)
+            card_content = f"{n * i}"
             card_style = "back-style"
 
-        # Το μυστικό είναι το id: αλλάζοντας το id, το Streamlit θεωρεί την κάρτα "νέα" 
-        # και πυροδοτεί το animation από την αρχή
-        card_html = '<div class="main-card ' + anim_class + '" id="c_' + str(st.session_state.card_id) + '_' + str(st.session_state.show_answer) + '">'
-        card_html += '<div class="card-content ' + card_style + '">' + card_content + '</div>'
+        card_html = f'<div class="main-card {anim_class}" id="c_{st.session_state.card_id}_{st.session_state.show_answer}">'
+        card_html += f'<div class="card-content {card_style}">{card_content}</div>'
         card_html += '</div>'
         
         st.markdown(card_html, unsafe_allow_html=True)
