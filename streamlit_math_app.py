@@ -60,12 +60,12 @@ css_code = """
     color: #0077b6;
     border: 8px solid #00b4d8;
     border-radius: 30px;
-    padding: 80px 40px; /* Περισσότερο χώρο εσωτερικά */
+    padding: 80px 40px;
     text-align: center;
-    font-size: 60px; /* Πολύ μεγάλη γραμματοσειρά */
+    font-size: 60px;
     font-weight: bold;
     box-shadow: 0px 15px 30px rgba(0,0,0,0.2);
-    margin-top: -30px; /* Ανέβασμα πιο ψηλά */
+    margin-top: -50px; /* Πιο ψηλά */
     margin-bottom: 40px;
     line-height: 1.2;
     animation: textFadeIn 1.5s ease-out;
@@ -96,7 +96,7 @@ div.stButton > button:first-child[kind='primary'] {
 
 st.markdown(css_code, unsafe_allow_html=True)
 
-# 3. Session State
+# 3. Session State initialization
 if 'game_started' not in st.session_state: st.session_state.game_started = False
 if 'correct_answers' not in st.session_state: st.session_state.correct_answers = set()
 if 'current_q' not in st.session_state: st.session_state.current_q = None
@@ -134,25 +134,4 @@ else:
         st.session_state.is_finished = True
         st.rerun()
 
-    if st.session_state.is_finished:
-        # Μπαλόνια και Μεγάλο Γαλάζιο Τετράγωνο Πλαίσιο (Ανέβηκε πιο ψηλά)
-        st.balloons()
-        st.markdown('<div class="final-success-box">🎈👏🏻 Συγχαρητήρια!<br>Τα έμαθες όλα!</div>', unsafe_allow_html=True)
-        
-        if st.button("🔄 Παίξε ξανά", use_container_width=True):
-            st.session_state.game_started = False
-            st.session_state.is_finished = False
-            st.rerun()
-    else:
-        progress_val = len(st.session_state.correct_answers) / len(all_q)
-        st.progress(progress_val)
-        st.markdown(f'<div class="score-box">🟦 Σωστά: {len(st.session_state.correct_answers)} / {len(all_q)}</div>', unsafe_allow_html=True)
-        
-        if st.session_state.current_q is None:
-            st.session_state.current_q = random.choice(rem_q)
-            st.session_state.show_answer = False
-            st.session_state.card_id += 1
-
-        n, i = st.session_state.current_q
-        
-        if len(
+    if st.session_state.is_
