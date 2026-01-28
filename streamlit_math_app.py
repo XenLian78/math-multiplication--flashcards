@@ -9,7 +9,6 @@ css_code = """
 <style>
 .stApp { background-color: #f0f7ff; }
 
-/* Animations */
 @keyframes textFadeIn {
     0% { opacity: 0; filter: blur(5px); }
     100% { opacity: 1; filter: blur(0px); }
@@ -25,7 +24,6 @@ css_code = """
     100% { opacity: 1; }
 }
 
-/* Κλάσεις για την Κάρτα */
 .main-card {
     background-color: transparent;
     width: 100%;
@@ -54,7 +52,6 @@ css_code = """
 .front-style { background-color: white; color: #495057; border-color: #a2d2ff; }
 .back-style { background-color: #f0f9ff; color: #0077b6; border-color: #00b4d8; }
 
-/* Το Τελικό Γαλάζιο Τετράγωνο Πλαίσιο - Μεγάλο & Ψηλά */
 .final-success-box {
     background-color: #f0f9ff;
     color: #0077b6;
@@ -142,5 +139,29 @@ else:
     all_q = [(n, i) for n in st.session_state.selected_numbers for i in range(1, 11)]
     rem_q = [q for q in all_q if q not in st.session_state.correct_answers]
 
-    # Έλεγχος ολοκλήρωσης
-    if not rem_q and not st.session
+    # Διορθωμένος έλεγχος ολοκλήρωσης
+    if not rem_q and not st.session_state.is_finished:
+        st.session_state.is_finished = True
+        st.rerun()
+
+    if st.session_state.is_finished:
+        st.balloons()
+        st.markdown('<div class="final-success-box">🎈👏🏻 Συγχαρητήρια!<br>Τα έμαθες όλα!</div>', unsafe_allow_html=True)
+        
+        if st.button("🔄 Παίξε ξανά", use_container_width=True):
+            st.session_state.game_started = False
+            st.session_state.is_finished = False
+            st.rerun()
+    else:
+        # Progress Bar
+        score = len(st.session_state.correct_answers)
+        total = len(all_q)
+        st.progress(score / total)
+        st.markdown(f'<div class="score-box">🟦 Σωστά: {score} / {total}</div>', unsafe_allow_html=True)
+        
+        if st.session_state.current_q is None:
+            st.session_state.current_q = random.choice(rem_q)
+            st.session_state.show_answer = False
+            st.session_state.card_id += 1
+
+        n, m =
