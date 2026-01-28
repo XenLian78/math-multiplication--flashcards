@@ -26,7 +26,7 @@ css_code = """
 
 .flip-card-inner { 
     position: relative; width: 100%; height: 100%; text-align: center; 
-    transition: transform 0.0s; transform-style: preserve-3d; 
+    transition: transform 0.8s; transform-style: preserve-3d; 
 }
 
 .do-flip { transform: rotateY(180deg); }
@@ -39,7 +39,7 @@ css_code = """
 
 .flip-card-front { background-color: white; color: #495057; border: 4px solid #a2d2ff; }
 .flip-card-back { 
-    background-color: #f0f9ff; color: #0077b6; border: 4px solid #00b4d8; 
+    background-color: #f0f9ff; color: #0077b6; border: 4px solid #00b4d8; frontface-visibility: hidden;
     transform: rotateY(180deg); 
 }
 
