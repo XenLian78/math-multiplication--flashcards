@@ -35,9 +35,9 @@ css_code = """
     margin: 20px 0;
 }
 
-/* Εφαρμογή του Animation στο κείμενο (1,2 δευτερόλεπτα για να είναι πολύ αργό) */
+/* Εφαρμογή του Animation στο κείμενο (1 δευτερόλεπτα για να είναι πολύ αργό) */
 .slow-text-fade {
-    animation: textFadeIn 1.2s ease-out forwards;
+    animation: textFadeIn 1s ease-out forwards;
 }
 
 .box-anim {
