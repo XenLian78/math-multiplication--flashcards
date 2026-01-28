@@ -5,35 +5,76 @@ import random
 st.set_page_config(page_title="Μαθαίνω την Προπαίδεια", page_icon="🧮")
 
 # 2. CSS για Animations
-css_code = "<style>"
-css_code += ".stApp { background-color: #f0f7ff; }"
+css_code = """
+<style>
+.stApp { background-color: #f0f7ff; }
 
-# Animation Fade In - Πολύ αργό (3.5s)
-css_code += "@keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }"
+/* Το Fade In animation που ζήτησες να είναι αργό και σταθερό */
+@keyframes slowFade {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
 
-# Animations Εισόδου/Εξόδου (Εναρμονισμένα στα 3.5s)
-css_code += "@keyframes slideInLeft { 0% { transform: translateX(-150%) rotate(-10deg); opacity: 0; } 100% { transform: translateX(0) rotate(0deg); opacity: 1; } }"
-css_code += "@keyframes slideOutRight { 0% { transform: translateX(0); opacity: 1; } 100% { transform: translateX(150%) rotate(10deg); opacity: 0; } }"
+/* Animation για την πρώτη είσοδο */
+@keyframes slideInLeft {
+    0% { transform: translateX(-150%) rotate(-10deg); opacity: 0; }
+    100% { transform: translateX(0) rotate(0deg); opacity: 1; }
+}
 
-# Βασικό στυλ κάρτας
-css_code += ".main-card { background-color: transparent; width: 100%; height: 250px; perspective: 1000px; margin: 20px 0; }"
+.main-card {
+    background-color: transparent;
+    width: 100%;
+    height: 250px;
+    perspective: 1000px;
+    margin: 20px 0;
+}
 
-# Εφαρμογή Durations: 3.5s για απόλυτα ομαλή μετάβαση
-css_code += ".fade-anim { animation: fadeIn 3.5s ease-out forwards; }"
-css_code += ".first-card-anim { animation: slideInLeft 3.5s ease-out forwards; }"
-css_code += ".last-card-anim { animation: slideOutRight 3.5s ease-in forwards; }"
+/* Εφαρμογή του αργού Fade (4 δευτερόλεπτα) */
+.fade-anim {
+    animation: slowFade 4.0s ease-in-out forwards;
+}
 
-# Δομή κάρτας
-css_code += ".card-content { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; border-radius: 25px; font-size: 55px; font-weight: bold; box-shadow: 0px 8px 16px rgba(0,0,0,0.1); border: 4px solid; transition: background-color 0.5s ease; }"
+.first-card-anim {
+    animation: slideInLeft 2.5s ease-out forwards;
+}
 
-# Χρώματα
-css_code += ".front-style { background-color: white; color: #495057; border-color: #a2d2ff; }"
-css_code += ".back-style { background-color: #f0f9ff; color: #0077b6; border-color: #00b4d8; }"
+.card-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 25px;
+    font-size: 55px;
+    font-weight: bold;
+    box-shadow: 0px 8px 16px rgba(0,0,0,0.1);
+    border: 4px solid;
+}
 
-css_code += ".score-box { background-color: white; padding: 15px; border-radius: 12px; text-align: center; font-size: 18px; border: 2px solid #bde0fe; color: #0077b6; margin-bottom: 10px; }"
-css_code += ".stButton>button { border-radius: 15px; font-weight: bold; }"
-css_code += "div.stButton > button:first-child[kind='primary'] { background-color: #0077b6; color: white; width: 100%; height: 3.5em; font-size: 22px; }"
-css_code += "</style>"
+.front-style { background-color: white; color: #495057; border-color: #a2d2ff; }
+.back-style { background-color: #f0f9ff; color: #0077b6; border-color: #00b4d8; }
+
+.score-box {
+    background-color: white;
+    padding: 15px;
+    border-radius: 12px;
+    text-align: center;
+    font-size: 18px;
+    border: 2px solid #bde0fe;
+    color: #0077b6;
+    margin-bottom: 10px;
+}
+
+.stButton>button { border-radius: 15px; font-weight: bold; }
+div.stButton > button:first-child[kind='primary'] {
+    background-color: #0077b6;
+    color: white;
+    width: 100%;
+    height: 3.5em;
+    font-size: 22px;
+}
+</style>
+"""
 
 st.markdown(css_code, unsafe_allow_html=True)
 
@@ -76,14 +117,13 @@ else:
         st.rerun()
 
     if st.session_state.is_finished:
-        st.markdown('<div class="main-card last-card-anim"></div>', unsafe_allow_html=True)
         st.balloons()
         st.success("🎈👏🏻 Συγχαρητήρια! Τα έμαθες όλα!")
         if st.button("🔄 Παίξε ξανά", use_container_width=True):
             st.session_state.game_started = False
             st.rerun()
     else:
-        # PROGRESS BAR
+        # PROGRESS
         progress_val = len(st.session_state.correct_answers) / len(all_q)
         st.progress(progress_val)
         st.markdown(f'<div class="score-box">🟦 Σωστά: {len(st.session_state.correct_answers)} / {len(all_q)}</div>', unsafe_allow_html=True)
@@ -95,11 +135,9 @@ else:
 
         n, i = st.session_state.current_q
         
-        # Εφαρμογή Fade-in σε κάθε αλλαγή (εκτός από την πρώτη-πρώτη είσοδο)
-        if len(st.session_state.correct_answers) == 0 and not st.session_state.show_answer:
-            anim_class = "first-card-anim"
-        else:
-            anim_class = "fade-anim"
+        # Εφαρμογή του Fade σε κάθε αλλαγή (το βίντεο έδειξε ότι αυτό λείπει)
+        # Για να δουλέψει το animation σε κάθε κλικ, αλλάζουμε το ID του div
+        anim_class = "first-card-anim" if len(st.session_state.correct_answers) == 0 and not st.session_state.show_answer else "fade-anim"
             
         if not st.session_state.show_answer:
             card_content = f"{n} x {i} = ?"
@@ -108,10 +146,13 @@ else:
             card_content = f"{n * i}"
             card_style = "back-style"
 
-        card_html = f'<div class="main-card {anim_class}" id="c_{st.session_state.card_id}_{st.session_state.show_answer}">'
-        card_html += f'<div class="card-content {card_style}">{card_content}</div>'
-        card_html += '</div>'
-        
+        # Εδώ είναι το "μαγικό": Το c_{st.session_state.card_id}_{st.session_state.show_answer} 
+        # αναγκάζει τον browser να ξανατρέξει το animation επειδή αλλάζει το ID
+        card_html = f'''
+        <div class="main-card {anim_class}" id="card_step_{st.session_state.card_id}_{st.session_state.show_answer}">
+            <div class="card-content {card_style}">{card_content}</div>
+        </div>
+        '''
         st.markdown(card_html, unsafe_allow_html=True)
 
         if not st.session_state.show_answer:
