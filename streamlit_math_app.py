@@ -2,9 +2,9 @@ import streamlit as st
 import random
 
 # 1. Ρύθμιση σελίδας
-st.set_page_config(page_title="Μαθαίνω την Προπαίδεια", page_icon="🧮", layout="centered")
+st.set_page_config(page_title="Μαθαίνω την Προπαίδεια", page_icon="🧮")
 
-# 2. CSS για Animations, Responsive Layout και Τελική Οθόνη
+# 2. CSS για Animations και Τελική Οθόνη
 css_code = """
 <style>
 .stApp { background-color: #f0f7ff; }
@@ -25,55 +25,52 @@ css_code = """
     100% { opacity: 1; }
 }
 
-/* Responsive Κάρτα */
+/* Κλάσεις για την Κάρτα */
 .main-card {
     background-color: transparent;
     width: 100%;
-    max-width: 500px;
-    margin: 20px auto;
+    height: 250px;
     perspective: 1000px;
-}
-
-.card-content {
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 25px;
-    font-weight: bold;
-    box-shadow: 0px 8px 16px rgba(0,0,0,0.1);
-    border: 4px solid;
-    font-size: clamp(40px, 10vw, 70px); 
+    margin: 20px 0;
 }
 
 .slow-text-fade { animation: textFadeIn 1s ease-out forwards; }
 .box-anim { animation: boxFade 1.5s ease-in-out; }
-.first-card-anim { animation: slideInLeft 2s ease-out forwards; }
+.first-card-anim { animation: slideInLeft 2.5s ease-out forwards; }
+
+.card-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 25px;
+    font-size: 65px;
+    font-weight: bold;
+    box-shadow: 0px 8px 16px rgba(0,0,0,0.1);
+    border: 4px solid;
+}
 
 .front-style { background-color: white; color: #495057; border-color: #a2d2ff; }
 .back-style { background-color: #f0f9ff; color: #0077b6; border-color: #00b4d8; }
 
-/* Το Τελικό Γαλάζιο Τετράγωνο Πλαίσιο - Responsive & Τετράγωνο */
+/* Το Τελικό Γαλάζιο Τετράγωνο Πλαίσιο - Μεγάλο & Ψηλά */
 .final-success-box {
     background-color: #f0f9ff;
     color: #0077b6;
     border: 10px solid #00b4d8;
     border-radius: 30px;
-    width: 100%;
-    max-width: 500px;
-    margin: -60px auto 40px auto; /* Ανεβασμένο ψηλά */
-    aspect-ratio: 1 / 1; /* Τέλεια τετράγωνο */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    padding: 100px 20px;
     text-align: center;
-    font-size: clamp(30px, 8vw, 55px);
+    font-size: 55px;
     font-weight: bold;
     box-shadow: 0px 15px 30px rgba(0,0,0,0.2);
-    animation: textFadeIn 1.5s ease-out;
+    margin-top: -80px; /* Ανεβασμένο ψηλά */
+    margin-bottom: 50px;
     line-height: 1.3;
+    animation: textFadeIn 1.5s ease-out;
+    width: 100%;
+    display: block;
 }
 
 .score-box {
@@ -87,19 +84,13 @@ css_code = """
     margin-bottom: 10px;
 }
 
-/* Στυλ Κουμπιών */
-.stButton>button { border-radius: 15px; font-weight: bold; height: 3.5em; }
-
-div.stButton > button[kind="primary"] {
-    background-color: #0077b6 !important;
-    color: white !important;
+.stButton>button { border-radius: 15px; font-weight: bold; }
+div.stButton > button:first-child[kind='primary'] {
+    background-color: #0077b6;
+    color: white;
     width: 100%;
-    font-size: 22px !important;
-    border: none !important;
-}
-
-div.stButton > button[kind="primary"]:hover {
-    background-color: #00b4d8 !important;
+    height: 3.5em;
+    font-size: 22px;
 }
 </style>
 """
@@ -151,19 +142,21 @@ else:
     all_q = [(n, i) for n in st.session_state.selected_numbers for i in range(1, 11)]
     rem_q = [q for q in all_q if q not in st.session_state.correct_answers]
 
+    # Έλεγχος ολοκλήρωσης
     if not rem_q and not st.session_state.is_finished:
         st.session_state.is_finished = True
         st.rerun()
 
     if st.session_state.is_finished:
         st.balloons()
-        st.markdown('<div class="final-success-box">🎈👏🏻<br>Συγχαρητήρια!<br>Τα έμαθες όλα!</div>', unsafe_allow_html=True)
+        st.markdown('<div class="final-success-box">🎈👏🏻 Συγχαρητήρια!<br>Τα έμαθες όλα!</div>', unsafe_allow_html=True)
         
         if st.button("🔄 Παίξε ξανά", use_container_width=True):
             st.session_state.game_started = False
             st.session_state.is_finished = False
             st.rerun()
     else:
+        # Progress & Score
         score_count = len(st.session_state.correct_answers)
         total_count = len(all_q)
         st.progress(score_count / total_count)
@@ -176,7 +169,11 @@ else:
 
         n, m = st.session_state.current_q
         
-        box_class = "first-card-anim" if score_count == 0 and not st.session_state.show_answer else "box-anim"
+        # Animation
+        if score_count == 0 and not st.session_state.show_answer:
+            box_class = "first-card-anim"
+        else:
+            box_class = "box-anim"
             
         if not st.session_state.show_answer:
             card_content = f"{n} x {m} = ?"
@@ -187,8 +184,9 @@ else:
             card_style = "back-style"
             text_class = "slow-text-fade"
 
+        # HTML Κάρτας
         card_html = f'''
-        <div class="main-card {box_class}">
+        <div class="main-card {box_class}" id="c_{st.session_state.card_id}_{st.session_state.show_answer}">
             <div class="card-content {card_style}">
                 <span class="{text_class}">{card_content}</span>
             </div>
@@ -196,6 +194,7 @@ else:
         '''
         st.markdown(card_html, unsafe_allow_html=True)
 
+        # Buttons
         if not st.session_state.show_answer:
             if st.button("ΔΕΣ ΤΗΝ ΑΠΑΝΤΗΣΗ 💡", use_container_width=True, type="primary"):
                 st.session_state.show_answer = True
