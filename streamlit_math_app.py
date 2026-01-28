@@ -34,7 +34,7 @@ css_code = """
     margin: 20px 0;
 }
 
-.slow-text-fade { animation: textFadeIn 1s ease-out forwards; }
+.slow-text-fade { animation: textFadeIn 2.5s ease-out forwards; }
 .box-anim { animation: boxFade 1.5s ease-in-out; }
 .first-card-anim { animation: slideInLeft 2.5s ease-out forwards; }
 
@@ -54,22 +54,23 @@ css_code = """
 .front-style { background-color: white; color: #495057; border-color: #a2d2ff; }
 .back-style { background-color: #f0f9ff; color: #0077b6; border-color: #00b4d8; }
 
-/* Το Τελικό Γαλάζιο Τετράγωνο Πλαίσιο - Μεγαλύτερο & Πιο Ψηλά */
+/* Το Τελικό Γαλάζιο Τετράγωνο Πλαίσιο - Μεγάλο & Ψηλά */
 .final-success-box {
     background-color: #f0f9ff;
     color: #0077b6;
     border: 8px solid #00b4d8;
     border-radius: 30px;
-    padding: 80px 40px;
+    padding: 100px 20px;
     text-align: center;
-    font-size: 60px;
+    font-size: 55px;
     font-weight: bold;
     box-shadow: 0px 15px 30px rgba(0,0,0,0.2);
-    margin-top: -50px; /* Πιο ψηλά */
-    margin-bottom: 40px;
-    line-height: 1.2;
-    animation: textFadeIn 1.5s ease-out;
+    margin-top: -60px;
+    margin-bottom: 50px;
+    line-height: 1.3;
+    animation: textFadeIn 2s ease-out;
     width: 100%;
+    display: block;
 }
 
 .score-box {
@@ -96,14 +97,21 @@ div.stButton > button:first-child[kind='primary'] {
 
 st.markdown(css_code, unsafe_allow_html=True)
 
-# 3. Session State initialization
-if 'game_started' not in st.session_state: st.session_state.game_started = False
-if 'correct_answers' not in st.session_state: st.session_state.correct_answers = set()
-if 'current_q' not in st.session_state: st.session_state.current_q = None
-if 'show_answer' not in st.session_state: st.session_state.show_answer = False
-if 'selected_numbers' not in st.session_state: st.session_state.selected_numbers = []
-if 'is_finished' not in st.session_state: st.session_state.is_finished = False
-if 'card_id' not in st.session_state: st.session_state.card_id = 0
+# 3. Session State Initialization
+if 'game_started' not in st.session_state:
+    st.session_state.game_started = False
+if 'correct_answers' not in st.session_state:
+    st.session_state.correct_answers = set()
+if 'current_q' not in st.session_state:
+    st.session_state.current_q = None
+if 'show_answer' not in st.session_state:
+    st.session_state.show_answer = False
+if 'selected_numbers' not in st.session_state:
+    st.session_state.selected_numbers = []
+if 'is_finished' not in st.session_state:
+    st.session_state.is_finished = False
+if 'card_id' not in st.session_state:
+    st.session_state.card_id = 0
 
 st.title("🧮 Το παιχνίδι της Προπαίδειας")
 
@@ -111,7 +119,11 @@ st.title("🧮 Το παιχνίδι της Προπαίδειας")
 if not st.session_state.game_started:
     st.subheader("Ποιους αριθμούς θα μάθουμε σήμερα;")
     cols = st.columns(5)
-    selected = [i for i in range(1, 11) if cols[(i-1)%5].checkbox(str(i), key=f"sel_{i}")]
+    selected = []
+    for i in range(1, 11):
+        if cols[(i-1)%5].checkbox(str(i), key=f"sel_{i}"):
+            selected.append(i)
+    
     st.session_state.selected_numbers = selected
     
     if selected:
@@ -130,8 +142,5 @@ else:
     all_q = [(n, i) for n in st.session_state.selected_numbers for i in range(1, 11)]
     rem_q = [q for q in all_q if q not in st.session_state.correct_answers]
 
-    if not rem_q and not st.session_state.is_finished:
-        st.session_state.is_finished = True
-        st.rerun()
-
-    if st.session_state.is_
+    # Έλεγχος ολοκλήρωσης
+    if not rem_q and not st.session
