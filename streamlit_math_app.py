@@ -37,7 +37,7 @@ css_code = """
 
 /* Εφαρμογή του Animation στο κείμενο (5 δευτερόλεπτα για να είναι πολύ αργό) */
 .slow-text-fade {
-    animation: textFadeIn 5.0s ease-out forwards;
+    animation: textFadeIn 3.0s ease-out forwards;
 }
 
 .box-anim {
