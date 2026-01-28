@@ -25,6 +25,7 @@ css_code = """
     100% { opacity: 1; }
 }
 
+/* Κλάσεις για την Κάρτα */
 .main-card {
     background-color: transparent;
     width: 100%;
@@ -53,19 +54,19 @@ css_code = """
 .front-style { background-color: white; color: #495057; border-color: #a2d2ff; }
 .back-style { background-color: #f0f9ff; color: #0077b6; border-color: #00b4d8; }
 
-/* Το Τελικό Γαλάζιο Τετράγωνο Πλαίσιο - Μεγαλύτερο & Πιο Ψηλά */
+/* Το Τελικό Γαλάζιο Τετράγωνο Πλαίσιο - Μεγάλο & Ψηλά */
 .final-success-box {
     background-color: #f0f9ff;
     color: #0077b6;
-    border: 8px solid #00b4d8;
+    border: 10px solid #00b4d8;
     border-radius: 30px;
-    padding: 80px 40px; 
+    padding: 100px 20px;
     text-align: center;
-    font-size: 55px; /* Μεγάλη γραμματοσειρά */
+    font-size: 55px;
     font-weight: bold;
-    box-shadow: 0px 15px 30px rgba(0,0,0,0.15);
-    margin-top: -60px; /* Ανέβασμα πιο ψηλά */
-    margin-bottom: 40px;
+    box-shadow: 0px 15px 30px rgba(0,0,0,0.2);
+    margin-top: -80px; /* Ανεβασμένο ψηλά */
+    margin-bottom: 50px;
     line-height: 1.3;
     animation: textFadeIn 1.5s ease-out;
     width: 100%;
@@ -96,14 +97,21 @@ div.stButton > button:first-child[kind='primary'] {
 
 st.markdown(css_code, unsafe_allow_html=True)
 
-# 3. Session State
-if 'game_started' not in st.session_state: st.session_state.game_started = False
-if 'correct_answers' not in st.session_state: st.session_state.correct_answers = set()
-if 'current_q' not in st.session_state: st.session_state.current_q = None
-if 'show_answer' not in st.session_state: st.session_state.show_answer = False
-if 'selected_numbers' not in st.session_state: st.session_state.selected_numbers = []
-if 'is_finished' not in st.session_state: st.session_state.is_finished = False
-if 'card_id' not in st.session_state: st.session_state.card_id = 0
+# 3. Session State Initialization
+if 'game_started' not in st.session_state:
+    st.session_state.game_started = False
+if 'correct_answers' not in st.session_state:
+    st.session_state.correct_answers = set()
+if 'current_q' not in st.session_state:
+    st.session_state.current_q = None
+if 'show_answer' not in st.session_state:
+    st.session_state.show_answer = False
+if 'selected_numbers' not in st.session_state:
+    st.session_state.selected_numbers = []
+if 'is_finished' not in st.session_state:
+    st.session_state.is_finished = False
+if 'card_id' not in st.session_state:
+    st.session_state.card_id = 0
 
 st.title("🧮 Το παιχνίδι της Προπαίδειας")
 
@@ -111,7 +119,11 @@ st.title("🧮 Το παιχνίδι της Προπαίδειας")
 if not st.session_state.game_started:
     st.subheader("Ποιους αριθμούς θα μάθουμε σήμερα;")
     cols = st.columns(5)
-    selected = [i for i in range(1, 11) if cols[(i-1)%5].checkbox(str(i), key=f"sel_{i}")]
+    selected = []
+    for i in range(1, 11):
+        if cols[(i-1)%5].checkbox(str(i), key=f"sel_{i}"):
+            selected.append(i)
+    
     st.session_state.selected_numbers = selected
     
     if selected:
@@ -130,6 +142,7 @@ else:
     all_q = [(n, i) for n in st.session_state.selected_numbers for i in range(1, 11)]
     rem_q = [q for q in all_q if q not in st.session_state.correct_answers]
 
+    # Έλεγχος ολοκλήρωσης
     if not rem_q and not st.session_state.is_finished:
         st.session_state.is_finished = True
         st.rerun()
@@ -143,6 +156,60 @@ else:
             st.session_state.is_finished = False
             st.rerun()
     else:
-        progress_val = len(st.session_state.correct_answers) / len(all_q)
-        st.progress(progress_val)
-        st.markdown(f'<div class="score-box">🟦 Σωστά: {len(st.session_state
+        # Progress & Score
+        score_count = len(st.session_state.correct_answers)
+        total_count = len(all_q)
+        st.progress(score_count / total_count)
+        st.markdown(f'<div class="score-box">🟦 Σωστά: {score_count} / {total_count}</div>', unsafe_allow_html=True)
+        
+        if st.session_state.current_q is None:
+            st.session_state.current_q = random.choice(rem_q)
+            st.session_state.show_answer = False
+            st.session_state.card_id += 1
+
+        n, m = st.session_state.current_q
+        
+        # Animation
+        if score_count == 0 and not st.session_state.show_answer:
+            box_class = "first-card-anim"
+        else:
+            box_class = "box-anim"
+            
+        if not st.session_state.show_answer:
+            card_content = f"{n} x {m} = ?"
+            card_style = "front-style"
+            text_class = ""
+        else:
+            card_content = f"{n * m}"
+            card_style = "back-style"
+            text_class = "slow-text-fade"
+
+        # HTML Κάρτας
+        card_html = f'''
+        <div class="main-card {box_class}" id="c_{st.session_state.card_id}_{st.session_state.show_answer}">
+            <div class="card-content {card_style}">
+                <span class="{text_class}">{card_content}</span>
+            </div>
+        </div>
+        '''
+        st.markdown(card_html, unsafe_allow_html=True)
+
+        # Buttons
+        if not st.session_state.show_answer:
+            if st.button("ΔΕΣ ΤΗΝ ΑΠΑΝΤΗΣΗ 💡", use_container_width=True, type="primary"):
+                st.session_state.show_answer = True
+                st.rerun()
+        else:
+            c1, c2 = st.columns(2)
+            if c1.button("Το βρήκες! ✅", use_container_width=True):
+                st.session_state.correct_answers.add(st.session_state.current_q)
+                st.session_state.current_q = None
+                st.rerun()
+            if c2.button("Ξαναπροσπάθησε 😉", use_container_width=True):
+                st.session_state.current_q = None
+                st.rerun()
+
+        st.write("")
+        if st.button("⬅️ Αλλαγή Αριθμών", use_container_width=True):
+            st.session_state.game_started = False
+            st.rerun()
