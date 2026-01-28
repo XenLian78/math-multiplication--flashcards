@@ -145,4 +145,4 @@ else:
     else:
         progress_val = len(st.session_state.correct_answers) / len(all_q)
         st.progress(progress_val)
-        st.markdown(f'<div class="score-box">🟦 Σωστά: {len(st.session_state)})
+        st.markdown(f'<div class="score-box">🟦 Σωστά: {len(st.session_state)}')
