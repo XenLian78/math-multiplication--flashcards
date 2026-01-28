@@ -11,7 +11,7 @@ css_code = """
 
 @keyframes slideInLeft {
     0% { transform: translateX(-150%) rotate(-10deg); opacity: 0; }
-    100% { transform: translateX(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateX(10) rotate(0deg); opacity: 1; }
 }
 
 @keyframes slideOutRight {
