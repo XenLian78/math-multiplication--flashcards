@@ -4,29 +4,33 @@ import random
 # 1. Ρύθμιση σελίδας
 st.set_page_config(page_title="Μαθαίνω την Προπαίδεια", page_icon="🧮")
 
-# 2. CSS για Animations
+# 2. CSS για Animations και Τελική Οθόνη
 css_code = """
 <style>
 .stApp { background-color: #f0f7ff; }
 
-/* Animation για το κείμενο (τον αριθμό) - Πολύ αργό Fade In */
+/* Animations */
 @keyframes textFadeIn {
     0% { opacity: 0; filter: blur(5px); }
     100% { opacity: 1; filter: blur(0px); }
 }
 
-/* Animation για την πρώτη είσοδο της κάρτας */
 @keyframes slideInLeft {
     0% { transform: translateX(-150%) rotate(-10deg); opacity: 0; }
     100% { transform: translateX(0) rotate(0deg); opacity: 1; }
 }
 
-/* Animation για το πλαίσιο της κάρτας */
+@keyframes slideOutRight {
+    0% { transform: translateX(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateX(150%) rotate(10deg); opacity: 0; }
+}
+
 @keyframes boxFade {
     0% { opacity: 0.5; }
     100% { opacity: 1; }
 }
 
+/* Κλάσεις για την Κάρτα */
 .main-card {
     background-color: transparent;
     width: 100%;
@@ -35,18 +39,10 @@ css_code = """
     margin: 20px 0;
 }
 
-/* Εφαρμογή του Animation στο κείμενο (1 δευτερόλεπτα για να είναι πολύ αργό) */
-.slow-text-fade {
-    animation: textFadeIn 1s ease-out forwards;
-}
-
-.box-anim {
-    animation: boxFade 1.5s ease-in-out;
-}
-
-.first-card-anim {
-    animation: slideInLeft 2.5s ease-out forwards;
-}
+.slow-text-fade { animation: textFadeIn 1s ease-out forwards; }
+.box-anim { animation: boxFade 1.5s ease-in-out; }
+.first-card-anim { animation: slideInLeft 2.5s ease-out forwards; }
+.exit-card-anim { animation: slideOutRight 2.0s ease-in forwards; }
 
 .card-content {
     width: 100%;
@@ -55,7 +51,7 @@ css_code = """
     align-items: center;
     justify-content: center;
     border-radius: 25px;
-    font-size: 65px; /* Μεγαλύτερη γραμματοσειρά για την απάντηση */
+    font-size: 65px;
     font-weight: bold;
     box-shadow: 0px 8px 16px rgba(0,0,0,0.1);
     border: 4px solid;
@@ -63,6 +59,22 @@ css_code = """
 
 .front-style { background-color: white; color: #495057; border-color: #a2d2ff; }
 .back-style { background-color: #f0f9ff; color: #0077b6; border-color: #00b4d8; }
+
+/* Το Τελικό Γαλάζιο Τετράγωνο Πλαίσιο */
+.final-success-box {
+    background-color: #f0f9ff;
+    color: #0077b6;
+    border: 6px solid #00b4d8;
+    border-radius: 25px;
+    padding: 60px 20px;
+    text-align: center;
+    font-size: 45px; /* Μεγάλη γραμματοσειρά */
+    font-weight: bold;
+    box-shadow: 0px 12px 24px rgba(0,0,0,0.15);
+    margin: 40px 0;
+    line-height: 1.4;
+    animation: textFadeIn 2s ease-out;
+}
 
 .score-box {
     background-color: white;
@@ -122,15 +134,22 @@ else:
     all_q = [(n, i) for n in st.session_state.selected_numbers for i in range(1, 11)]
     rem_q = [q for q in all_q if q not in st.session_state.correct_answers]
 
+    # Αν τελειώσαμε, δείξε πρώτα την κάρτα να φεύγει
     if not rem_q and not st.session_state.is_finished:
         st.session_state.is_finished = True
         st.rerun()
 
     if st.session_state.is_finished:
+        # Εφέ εξόδου της τελευταίας κάρτας
+        st.markdown('<div class="main-card exit-card-anim"><div class="card-content back-style">🌟</div></div>', unsafe_allow_html=True)
+        
+        # Μπαλόνια και Μεγάλο Γαλάζιο Πλαίσιο
         st.balloons()
-        st.success("🎈👏🏻 Συγχαρητήρια! Τα έμαθες όλα!")
+        st.markdown('<div class="final-success-box">🎈👏🏻 Συγχαρητήρια!<br>Τα έμαθες όλα!</div>', unsafe_allow_html=True)
+        
         if st.button("🔄 Παίξε ξανά", use_container_width=True):
             st.session_state.game_started = False
+            st.session_state.is_finished = False
             st.rerun()
     else:
         progress_val = len(st.session_state.correct_answers) / len(all_q)
@@ -144,7 +163,6 @@ else:
 
         n, i = st.session_state.current_q
         
-        # Επιλογή κλάσης για το κουτί
         if len(st.session_state.correct_answers) == 0 and not st.session_state.show_answer:
             box_class = "first-card-anim"
         else:
@@ -153,13 +171,12 @@ else:
         if not st.session_state.show_answer:
             card_content = f"{n} x {i} = ?"
             card_style = "front-style"
-            text_class = "" # Χωρίς fade στην ερώτηση για να είναι άμεσα ορατή
+            text_class = ""
         else:
             card_content = f"{n * i}"
             card_style = "back-style"
-            text_class = "slow-text-fade" # ΕΔΩ εφαρμόζεται το αργό fade στην απάντηση
+            text_class = "slow-text-fade"
 
-        # Κατασκευή HTML: Το animation slow-text-fade μπαίνει μέσα στο περιεχόμενο
         card_html = f'''
         <div class="main-card {box_class}" id="c_{st.session_state.card_id}_{st.session_state.show_answer}">
             <div class="card-content {card_style}">
